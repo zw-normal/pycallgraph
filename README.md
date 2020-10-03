@@ -8,4 +8,12 @@ ATTENTION: If you want to generate dot graph, make sure the `Graphviz` is instal
 
 The code and dependencies can be easily adjusted to work on both Python 2.7 or Python 3, but make sure the right Python version is used when analysing source code.
 
+## Examples
+The following are two examples of checking the calling & callee of two functions in open source project: https://github.com/nedbat/coveragepy:
+
+### Callee (who calls the function)
+![Alt text](build_func_deps_callee.png?raw=true "Callee")
+
+### Calling (who the function calls)
+![Alt text](build_func_deps_calling.png?raw=true "Calling")
  

@@ -60,9 +60,9 @@ if __name__ == '__main__':
         '.idea',
     )
     # Function name to inspect
-    function_to_check = 'disposition_init'
+    function_to_check = 'load_plugins'
     # Want to checking calling or being called
-    check_calling = False
+    check_calling = True
     # Want to exclude short name functions
     low_sensitivity = False
 
