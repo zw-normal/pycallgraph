@@ -6,3 +6,4 @@ db.sqlite3
 /venv
 build_func_deps.dot
 build_func_deps.png
+build_func_deps.graph

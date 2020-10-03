@@ -2,15 +2,19 @@ import ast
 import os
 import networkx as nx
 from networkx.drawing.nx_agraph import write_dot
+from networkx.readwrite.gpickle import write_gpickle, read_gpickle
 
 
 call_graph = nx.DiGraph()
 
-
-def is_valid_function(name):
+def is_valid_func(name):
     # When low_sensitivity is True, any conditions can be added here if the function is too common.
     # For example, filter it out from the output graph directly by name etc.
     return len(name) > 6
+
+
+def is_buildin_func(name):
+    return name in __builtins__.__dict__.keys()
 
 
 def is_class(name):
@@ -23,10 +27,18 @@ def set_color_of_node(graph, name, color):
         graph.nodes[name]['style'] = 'filled'
 
 
+def set_shape_of_node(graph, name, shape):
+    if name in graph.nodes:
+        graph.nodes[name]['shape'] = shape
+
+
 class FunctionDefVisitor(ast.NodeVisitor):
 
     def visit_FunctionDef(self, node):
         call_graph.add_node(node.name)
+        set_shape_of_node(call_graph, node.name, 'box')
+        set_color_of_node(call_graph, node.name, 'gray')
+
         func_call_visitor = FunctionCallVisitor(node)
         func_call_visitor.visit(node)
         self.generic_visit(node)
@@ -46,8 +58,11 @@ class FunctionCallVisitor(ast.NodeVisitor):
             func_name = node.func.id
         if func_name is not None:
             call_graph.add_edge(self.parent.name, func_name)
+            set_shape_of_node(call_graph, func_name, 'box')
             if is_class(func_name):
                 set_color_of_node(call_graph, func_name, 'yellow')
+            else:
+                set_color_of_node(call_graph, func_name, 'lightgray')
         self.generic_visit(node)
 
     def visit_FunctionDef(self, node):
@@ -82,21 +97,32 @@ if __name__ == '__main__':
     check_calling = True
     # Want to exclude short name functions
     low_sensitivity = False
+    # Want to exclude buildin functions
+    exclude_build_ins = True
+    # Where to load & save graph
+    output_file = os.path.join('.', 'build_func_deps.graph')
 
-    for folder, next_folders, files in os.walk(root):
-        for file in files:
-            if not any([f in folder for f in EXCLUDE_FOLDERS]) \
-                    and 'test' not in file:
-                _, ext = os.path.splitext(file)
-                if ext == '.py':
-                    with open(os.path.join(folder, file), 'r') as source:
-                        ast_tree = ast.parse(source.read())
-                        func_def_visitor = FunctionDefVisitor()
-                        func_def_visitor.visit(ast_tree)
+    if os.path.isfile(output_file):
+        call_graph = read_gpickle(output_file)
+    else:
+        for folder, next_folders, files in os.walk(root):
+            for file in files:
+                if not any([f in folder for f in EXCLUDE_FOLDERS]) \
+                        and 'test' not in file:
+                    _, ext = os.path.splitext(file)
+                    if ext == '.py':
+                        with open(os.path.join(folder, file), 'r') as source:
+                            ast_tree = ast.parse(source.read())
+                            func_def_visitor = FunctionDefVisitor()
+                            func_def_visitor.visit(ast_tree)
+        write_gpickle(call_graph, output_file)
 
     sub_call_graph = call_graph
     if low_sensitivity:
-        selected_functions = [n for n, v in call_graph.nodes(data=True) if is_valid_function(n)]
+        selected_functions = [n for n, _ in call_graph.nodes(data=True) if is_valid_func(n)]
+        sub_call_graph = call_graph.subgraph(selected_functions)
+    if exclude_build_ins:
+        selected_functions = [n for n, _ in sub_call_graph.nodes(data=True) if not is_buildin_func(n)]
         sub_call_graph = call_graph.subgraph(selected_functions)
 
     if check_calling:
@@ -108,6 +134,6 @@ if __name__ == '__main__':
         path_functions.update(func_node[1])
     sub_call_graph = call_graph.subgraph(path_functions)
     if func_to_check in sub_call_graph.nodes:
-        set_color_of_node(sub_call_graph, func_to_check, 'green')
+        set_color_of_node(sub_call_graph, func_to_check, 'greenyellow')
 
     write_dot(sub_call_graph, 'build_func_deps.dot')
