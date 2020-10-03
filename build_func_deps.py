@@ -8,7 +8,7 @@ call_graph = nx.DiGraph()
 
 
 def is_valid_function(name):
-    # Any conditions can be added here if the function is too common.
+    # When low_sensitivity is True, any conditions can be added here if the function is too common.
     # For example, filter it out from the output graph directly by name etc.
     return len(name) > 6
 
