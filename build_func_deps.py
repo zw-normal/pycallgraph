@@ -8,7 +8,17 @@ call_graph = nx.DiGraph()
 
 
 def is_valid_function(name):
-    return len(name) > 6 and (not name[0].isupper())
+    return len(name) > 6
+
+
+def is_class(name):
+    return name[0].isupper()
+
+
+def set_color_of_node(graph, name, color):
+    if name in graph.nodes:
+        graph.nodes[name]['fillcolor'] = color
+        graph.nodes[name]['style'] = 'filled'
 
 
 class FunctionDefVisitor(ast.NodeVisitor):
@@ -27,10 +37,15 @@ class FunctionCallVisitor(ast.NodeVisitor):
 
     def visit_Call(self, node):
         # Caller -> Callee
+        func_name = None
         if isinstance(node.func, ast.Attribute):
-            call_graph.add_edge(self.parent.name, node.func.attr)
+            func_name = node.func.attr
         elif isinstance(node.func, ast.Name):
-            call_graph.add_edge(self.parent.name, node.func.id)
+            func_name = node.func.id
+        if func_name is not None:
+            call_graph.add_edge(self.parent.name, func_name)
+            if is_class(func_name):
+                set_color_of_node(call_graph, func_name, 'yellow')
         self.generic_visit(node)
 
     def visit_FunctionDef(self, node):
@@ -60,7 +75,7 @@ if __name__ == '__main__':
         '.idea',
     )
     # Function name to inspect
-    function_to_check = 'load_plugins'
+    func_to_check = 'load_plugins'
     # Want to checking calling or being called
     check_calling = True
     # Want to exclude short name functions
@@ -77,22 +92,20 @@ if __name__ == '__main__':
                         func_def_visitor = FunctionDefVisitor()
                         func_def_visitor.visit(ast_tree)
 
-    # Whether we want to hide functions with short name
     sub_call_graph = call_graph
     if low_sensitivity:
         selected_functions = [n for n, v in call_graph.nodes(data=True) if is_valid_function(n)]
         sub_call_graph = call_graph.subgraph(selected_functions)
 
     if check_calling:
-        paths = nx.single_source_shortest_path(sub_call_graph, function_to_check)
+        paths = nx.single_source_shortest_path(sub_call_graph, func_to_check)
     else:
-        paths = nx.single_source_shortest_path(sub_call_graph.reverse(), function_to_check)
+        paths = nx.single_source_shortest_path(sub_call_graph.reverse(), func_to_check)
     path_functions = set()
     for func_node in paths.items():
         path_functions.update(func_node[1])
     sub_call_graph = call_graph.subgraph(path_functions)
-    if function_to_check in sub_call_graph.nodes:
-        sub_call_graph.nodes[function_to_check]['fillcolor'] = 'green'
-        sub_call_graph.nodes[function_to_check]['style'] = 'filled'
+    if func_to_check in sub_call_graph.nodes:
+        set_color_of_node(sub_call_graph, func_to_check, 'green')
 
     write_dot(sub_call_graph, 'build_func_deps.dot')
