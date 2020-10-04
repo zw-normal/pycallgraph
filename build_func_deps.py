@@ -58,7 +58,7 @@ class FunctionCallVisitor(ast.NodeVisitor):
 output_file = os.path.join('.', 'build_func_deps.graph')
 
 if __name__ == '__main__':
-    # Need networkx 2.2 or above version
+    # networkx 2.2 or above version is needed
 
     # Roots path of the python source code
     roots = [

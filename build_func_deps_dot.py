@@ -17,7 +17,7 @@ def set_shape_of_node(graph, name, shape):
 
 
 if __name__ == '__main__':
-    # networkx, graphviz or pygraphviz are needed to generate dot & png
+    # networkx 2.2 or above, graphviz or pygraphviz are needed to generate dot & png
 
     # Function name to inspect
     func_to_check = 'get_search_where_sql'
