@@ -21,20 +21,24 @@ if __name__ == '__main__':
 
     # Function name to inspect
     func_to_check = 'load_plugins'
-    # Want to checking calling or being called
-    check_calling = False
-    # Make sure to cutoff
-    path_cutoff = 3
+    # Upstream cutoff (who is calling the func)
+    upstream_cutoffs = 3
+    # Downstream cutoff (who the func is calling)
+    downstream_cutoff = 2
 
     call_graph = read_gpickle(output_file)
-    if check_calling:
-        paths = nx.single_source_shortest_path(
-            call_graph, func_to_check, cutoff=path_cutoff)
-    else:
-        paths = nx.single_source_shortest_path(
-            call_graph.reverse(), func_to_check, cutoff=path_cutoff)
+    upstream_paths = {}
+    downstream_paths = {}
+    if downstream_cutoff > 0:
+        upstream_paths = nx.single_source_shortest_path(
+            call_graph, func_to_check, cutoff=downstream_cutoff)
+    if upstream_cutoffs > 0:
+        downstream_paths = nx.single_source_shortest_path(
+            call_graph.reverse(), func_to_check, cutoff=upstream_cutoffs)
     path_funcs = set()
-    for func_node in paths.items():
+    for func_node in upstream_paths.items():
+        path_funcs.update(func_node[1])
+    for func_node in downstream_paths.items():
         path_funcs.update(func_node[1])
     call_graph = call_graph.subgraph(path_funcs)
     if func_to_check in call_graph.nodes:

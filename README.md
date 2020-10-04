@@ -9,11 +9,6 @@ Please see the comments in the code for how to use it.
 NOTE: Although several enhancements can be added to reach more accurate (for example, checking whether the number of function arguments match the function definition), The purpose of the code is not absolutely accurate, but provide auxiliary to work with other methods (like code intelligence of IDE) to give a more comprehensive and convenient picture of the code. 
 
 ## Examples
-The following are two examples of checking the calling & callee of two functions in open source project: https://github.com/nedbat/coveragepy:
+The following example is the result of checking `load_plugins` in open source project: https://github.com/nedbat/coveragepy:
 
-### Callee (who calls the function)
-![Alt text](build_func_deps_callee.png?raw=true "Callee")
-
-### Calling (who the function calls)
-![Alt text](build_func_deps_calling.png?raw=true "Calling")
- 
+![Alt text](build_func_deps.png?raw=true "load_plugins graph")
