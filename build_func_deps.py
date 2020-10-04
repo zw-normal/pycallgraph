@@ -54,6 +54,7 @@ class FunctionCallVisitor(ast.NodeVisitor):
         # Do not iterate 'methods of inner class' in func
         pass
 
+
 # Where to save graph
 output_file = os.path.join('.', 'build_func_deps.graph')
 
@@ -62,8 +63,7 @@ if __name__ == '__main__':
 
     # Roots path of the python source code
     roots = [
-        'C:\\xplanbase\\version\\99.99.999\\lib',
-        'C:\\xplanbase\\version\\99.99.999\\src',
+        '/Users/weizheng/Programming/Python/coveragepy',
     ]
 
     for root in roots:
@@ -79,4 +79,4 @@ if __name__ == '__main__':
                             ast_tree = ast.parse(source.read())
                             func_def_visitor = FunctionDefVisitor()
                             func_def_visitor.visit(ast_tree)
-        write_gpickle(call_graph, output_file)
+    write_gpickle(call_graph, output_file)

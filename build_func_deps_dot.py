@@ -20,11 +20,11 @@ if __name__ == '__main__':
     # networkx 2.2 or above, graphviz or pygraphviz are needed to generate dot & png
 
     # Function name to inspect
-    func_to_check = 'get_search_where_sql'
+    func_to_check = 'load_plugins'
     # Want to checking calling or being called
     check_calling = False
     # Make sure to cutoff
-    path_cutoff = 4
+    path_cutoff = 3
 
     call_graph = read_gpickle(output_file)
     if check_calling:
