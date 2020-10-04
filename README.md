@@ -11,7 +11,7 @@ NOTE: Although several enhancements can be added to reach more accurate (for exa
 ## Examples
 The following example is the result of checking `load_plugins` in open source project: https://github.com/nedbat/coveragepy:
 
-![Alt text](build_func_deps.png?raw=true "load_plugins graph")
+![Alt text](build_func_deps.example.png?raw=true "load_plugins graph")
 
 ## How to use
 1. Clone the code:
