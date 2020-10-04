@@ -1,7 +1,6 @@
 import ast
 import os
 import networkx as nx
-# from networkx.readwrite.gexf import write_gexf
 from networkx.readwrite.gpickle import write_gpickle
 
 
@@ -59,6 +58,7 @@ class FunctionCallVisitor(ast.NodeVisitor):
 output_file = os.path.join('.', 'build_func_deps.graph')
 
 if __name__ == '__main__':
+    # Need networkx 2.2 or above version
 
     # Roots path of the python source code
     roots = [
