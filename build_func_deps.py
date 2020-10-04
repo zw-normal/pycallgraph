@@ -3,6 +3,7 @@ import os
 import networkx as nx
 from networkx.readwrite.gpickle import write_gpickle
 
+from build_func_deps_config import roots, output_folder
 
 call_graph = nx.DiGraph()
 
@@ -55,17 +56,10 @@ class FunctionCallVisitor(ast.NodeVisitor):
         pass
 
 
-# Where to save graph
-output_file = os.path.join('.', 'build_func_deps.graph')
+output_file = os.path.join(output_folder, 'build_func_deps.graph')
 
 if __name__ == '__main__':
     # networkx 2.2 or above version is needed
-
-    # Roots path of the python source code
-    roots = [
-        '/Users/weizheng/Programming/Python/coveragepy',
-    ]
-
     for root in roots:
         for folder, next_folders, files in os.walk(root):
             for file in files:
