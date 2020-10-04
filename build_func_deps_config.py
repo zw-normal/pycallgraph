@@ -1,5 +1,3 @@
-import os
-
 # Roots path of the python source code
 roots = [
     '/Users/weizheng/Programming/Python/coveragepy',
