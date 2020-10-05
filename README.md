@@ -47,7 +47,7 @@ The following example is the result of checking `load_plugins` in open source pr
     sudo apt-get install python3-dev graphviz libgraphviz-dev pkg-config
     ./venv/bin/pip install pygraphviz
     ```
-7. Now the environment is ready, need to change the `build_func_deps_config.py` according to your paths and needs. Remember for complex code keep `upstream_cutoffs` and `downstream_cutoff` lower than 4, or it will take too much time when running step 9
+7. Now the environment is ready, need to change the `build_func_deps_config.py` according to your paths and needs. Remember for complex code keep `upstream_cutoffs` and `downstream_cutoff` lower than 4 (and also it will desirable to set one of them to 0 to get better results, due to potential bi-directional links exists), or it will take too much time when running step 9
 8. Run the following command to generate & save the whole call graph:
     ```shell script
     ./venv/bin/python build_func_deps.py
