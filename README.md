@@ -1,6 +1,6 @@
 # pyCallGraph
 
-The project uses Python ast module and very simple algorithm (but effective) to calculate potential static call graph of Python code. Basically it only compares function names and build the graph.
+The project uses Python ast module and very simple algorithm (but effective) to calculate potential static call graph of Python code. Basically it only compares function names and build the graph. Because nature of this comparison, this tool is not supposed to use with a function with common name (e.g. `save`, `load` etc.) because there may be too many matches (too many function definitions with same name in different modules and classes). It works well with functions that has more specific name (e.g. `load_plugins` etc.).
 
 The code and dependencies can be easily adjusted to work with both Python 2.7 or Python 3, but needs to make sure to pickup the right Python version when analysing source code. In other words, should match the Python version which is used by source code, or the ast module will report syntax error when trying to parse the source code files.
 
