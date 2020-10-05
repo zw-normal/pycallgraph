@@ -12,6 +12,8 @@ The following example is the result of checking `load_plugins` function of the o
 ![Alt text](build_func_deps.example.png?raw=true "load_plugins graph")
 
 ## How to use
+Currently as some difficulties to config/run `pygraphviz` package on Windows, only linux is supported.
+
 1. Clone the code:
     ```shell script
     git clone https://github.com/zw-normal/pycallgraph.git
