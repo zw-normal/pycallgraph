@@ -12,7 +12,7 @@ The following example is the result of checking `load_plugins` function of the o
 ![Alt text](build_func_deps.example.png?raw=true "load_plugins graph")
 
 ## How to use
-Currently as some difficulties to config/run `pygraphviz` package on Windows, only linux is supported.
+Currently as some difficulties to config/run `pygraphviz` package on Windows, only Linux is supported.
 
 1. Clone the code:
     ```shell script
@@ -47,7 +47,7 @@ Currently as some difficulties to config/run `pygraphviz` package on Windows, on
     sudo apt-get install python3-dev graphviz libgraphviz-dev pkg-config
     ./venv/bin/pip install pygraphviz
     ```
-7. Now the environment is ready, need to change the `build_func_deps_config.py` according to your paths and needs. Remember for complex Python code keep `upstream_cutoffs` and `downstream_cutoff` settings lower than 4, or it will take too much time when running step 9. It is also recommended to set one of parameters to 0 if sometimes the output dot layout is confusing).
+7. Now the environment is ready, need to change the `build_func_deps_config.py` according to your paths and needs. Remember for complex Python code keep `upstream_cutoffs` and `downstream_cutoff` settings lower than 4, or it will take too much time when running step 9. It is also recommended to set one of parameters to 0 if sometimes the output dot layout is confusing.
 8. Run the following command to generate & save the whole call graphs of the source code:
     ```shell script
     ./venv/bin/python build_func_deps.py
