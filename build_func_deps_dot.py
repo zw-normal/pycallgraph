@@ -30,12 +30,12 @@ if __name__ == '__main__':
     call_graph = read_gpickle(input_file)
     upstream_paths = {}
     downstream_paths = {}
-    if downstream_cutoff > 0:
-        upstream_paths = nx.single_source_shortest_path(
-            call_graph, func_to_check, cutoff=downstream_cutoff)
     if upstream_cutoffs > 0:
+        upstream_paths = nx.single_target_shortest_path(
+            call_graph, func_to_check, cutoff=upstream_cutoffs)
+    if downstream_cutoff > 0:
         downstream_paths = nx.single_source_shortest_path(
-            call_graph.reverse(), func_to_check, cutoff=upstream_cutoffs)
+            call_graph, func_to_check, cutoff=downstream_cutoff)
     path_funcs = set()
     for func_node in upstream_paths.items():
         path_funcs.update(func_node[1])
