@@ -41,6 +41,8 @@ if __name__ == '__main__':
         path_funcs.update(func_node[1])
     for func_node in downstream_paths.items():
         path_funcs.update(func_node[1])
+    # You can exclude any function names that cause confusing manually here
+    # (note edges will also be excluded), by deleting it from path_funcs
     call_graph = call_graph.subgraph(path_funcs)
     if func_to_check in call_graph.nodes:
         set_color_of_node(call_graph, func_to_check, 'greenyellow')
