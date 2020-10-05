@@ -41,13 +41,17 @@ if __name__ == '__main__':
         path_funcs.update(func_node[1])
     for func_node in downstream_paths.items():
         path_funcs.update(func_node[1])
-    # You can exclude any function names that cause confusing manually here
-    # (note edges will also be excluded), by deleting it from path_funcs
-    call_graph = call_graph.subgraph(path_funcs)
-    if func_to_check in call_graph.nodes:
-        set_color_of_node(call_graph, func_to_check, 'greenyellow')
+    if len(path_funcs) > 150:
+        print('More than 150 functions in the graph, please reduce '
+              'upstream_cutoff and/or downstream_cutoff')
+    else:
+        # You can exclude any function names that cause confusing manually here
+        # (note edges will also be excluded), by deleting it from path_funcs
+        call_graph = call_graph.subgraph(path_funcs)
+        if func_to_check in call_graph.nodes:
+            set_color_of_node(call_graph, func_to_check, 'greenyellow')
 
-    write_dot(call_graph, output_dot_file)
-    with open(output_png_file, "wb") as output:
-        subprocess.Popen(
-            ['dot', '-Tpng', output_dot_file], stdout=output)
+        write_dot(call_graph, output_dot_file)
+        with open(output_png_file, "wb") as output:
+            subprocess.Popen(
+                ['dot', '-Tpng', output_dot_file], stdout=output)
