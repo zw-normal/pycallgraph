@@ -23,9 +23,10 @@ def is_class(name):
 def is_class_or_instance_method(arguments):
     args_len = len(arguments.args)
     if args_len > 0:
-        first_arg = arguments.args[0].arg
-        if first_arg == 'cls' or first_arg == 'self':
-            return True
+        first_arg = arguments.args[0]
+        if isinstance(first_arg, ast.Name):
+            if first_arg.id == 'cls' or first_arg.id == 'self':
+                return True
     return False
 
 
