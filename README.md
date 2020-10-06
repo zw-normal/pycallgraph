@@ -1,10 +1,10 @@
 # pyCallGraph
 
-The project uses Python ast module and very simple algorithm (but effective) to calculate potential static call graph of Python code. Basically it only compares function names and build the graph. Because nature of this comparison, this tool is not supposed to use with a function with common name (e.g. `save`, `load` etc.) because there may be too many matches (too many function definitions with same name in different modules and classes). It works well with functions that has more specific name (e.g. `load_plugins` etc.).
+The project uses Python ast module and very simple algorithm (but effective) to calculate potential static call graph of Python code. Basically it only consider function names and the number of arguments when building the graph. Because nature of this comparison, this tool does not work well when using with a function with common name (e.g. `save`, `load` etc.), although considering arguments can alleviate this issue. It works well with functions that has more specific name (e.g. `load_plugins` etc.).
 
 The code and dependencies can be easily adjusted to work with both Python 2.7 or Python 3, but needs to make sure to pickup the right Python version when analysing source code. In other words, should match the Python version which is used by source code, or the ast module will report syntax error when trying to parse the source code files.
 
-NOTE: Although several enhancements can be added to achieve more accurate (e.g. checking if the number of calling function arguments matches the function definition), the purpose of the code is not to achieve absolutely accurate (actually it is impossible), but to provide auxiliary to work with other methods (like code intelligence of IDE) to give a more comprehensive and convenient picture of the Python code.
+NOTE: The purpose of the code is not to achieve absolutely accurate (actually it is impossible), but to provide auxiliary to work with other methods (like code intelligence of IDE) to give a more comprehensive and convenient picture of the Python code.
 
 ## Example
 The following example is the result of checking `load_plugins` function of the open source project: https://github.com/nedbat/coveragepy:
@@ -47,13 +47,21 @@ Currently as some difficulties to config/run `pygraphviz` package on Windows, on
     sudo apt-get install python3-dev graphviz libgraphviz-dev pkg-config
     ./venv/bin/pip install pygraphviz
     ```
-7. Now the environment is ready, need to change the `build_func_deps_config.py` according to your paths and needs. Remember for complex Python code keep `upstream_cutoffs` and `downstream_cutoff` settings lower than 4, or it will take too much time when running step 9. It is also recommended to set one of parameters to 0 if sometimes the output dot layout is confusing.
-8. Run the following command to generate & save the whole call graphs of the source code:
+7. Now the environment is ready, need to change the `build_func_deps_config.py` to setup output folder.
+8. Run the following command to generate & save the whole call graphs of the source code to the output folder:
     ```shell script
     ./venv/bin/python build_func_deps.py
     ```
 9. Now run the following command to generate the png file for the function to be inspected by `func_to_check` setting in `build_func_deps_config.py`:
     ```shell script
-    ./venv/bin/python build_func_deps_dot.py
+    ./venv/bin/python build_func_deps_dot.py 'load_plugins' 3 0
     ```
-10. From now on your can change `func_to_check` in `build_func_deps_config.py` and repeat step 9 to inspect any other functions. If you want to re-build whole call graphs, just run step 8 again.
+   The first argument is the name of the function to check. The second argument is the `upstream_cutoffs` and the third one is `downstream_cutoff`. Please run the following command to get helps:
+    ```shell script
+    ./venv/bin/python build_func_deps_dot.py -h
+    ```
+   The output png file(s) and node names in the png file(s) is in the format of `funcname_minargs_maxargs`, as the tool differentiate functions with both their names and the number of arguments. 
+   
+   It is recommended for complex Python code keeping the `upstream_cutoffs` and `downstream_cutoff` lower than 4, or it will take too much time to generate the result. It is also recommended to set one of parameters to 0 if sometimes the output png layout is confusing.
+
+10. From now on repeat step 9 to inspect any other functions. If you want to re-build the whole call graphs, just run step 8 again.
