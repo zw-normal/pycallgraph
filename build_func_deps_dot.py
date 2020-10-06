@@ -45,8 +45,7 @@ if __name__ == '__main__':
         for func_node in downstream_paths.items():
             path_funcs.update(func_node[1])
         if len(path_funcs) > 150:
-            print('More than 150 functions in the graph, please reduce '
-                'upstream_cutoff and/or downstream_cutoff')
+            print('More than 150 functions in the graph, please reduce upstream_cutoff and/or downstream_cutoff')
         else:
             call_graph = call_graph.subgraph(path_funcs.difference(funcs_to_exclude))
 
@@ -56,5 +55,5 @@ if __name__ == '__main__':
             with open(output_png_file, "wb") as output:
                 subprocess.Popen(
                     ['dot', '-Tpng', output_dot_file], stdout=output)
-    except NameError, NodeNotFound:
-        print ('The function "{}" is not found.'.format(func_to_check))
+    except (NameError, NodeNotFound):
+        print('The function "{}" is not found.'.format(func_to_check))
