@@ -1,6 +1,7 @@
 import ast
 import os
 import pickle
+import sys
 from collections import defaultdict
 
 import networkx as nx
@@ -24,9 +25,12 @@ def is_class_or_instance_method(arguments):
     args_len = len(arguments.args)
     if args_len > 0:
         first_arg = arguments.args[0]
-        if isinstance(first_arg, ast.Name):
-            if first_arg.id == 'cls' or first_arg.id == 'self':
-                return True
+        if sys.version_info.major >= 3:
+            first_arg = first_arg.arg
+        elif isinstance(first_arg, ast.Name):
+            first_arg = first_arg.id
+        if isinstance(first_arg, str) and (first_arg == 'cls' or first_arg == 'self'):
+            return True
     return False
 
 
