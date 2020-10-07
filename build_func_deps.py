@@ -80,10 +80,7 @@ class FunctionDefVisitorPhase1(ast.NodeVisitor):
     # Phase 1 is to collect all function defs
     def visit_FunctionDef(self, node):
         func_def = FunctionDef(node)
-        if is_class(node.name):
-            call_graph.add_node(func_def, shape='box', fillcolor='yellow', style='filled')
-        else:
-            call_graph.add_node(func_def, shape='box', fillcolor='lightgray', style='filled')
+        call_graph.add_node(func_def, shape='box', fillcolor='lightgray', style='filled')
         func_defs[node.name].add(func_def)
 
         self.generic_visit(node)
