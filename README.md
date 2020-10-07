@@ -56,7 +56,7 @@ Currently as some difficulties to config/run `pygraphviz` package on Windows, on
     ```shell script
     ./venv/bin/python build_func_deps_dot.py 'load_plugins' 3 0
     ```
-   The first argument is the name of the function to check. The second argument is the `upstream_cutoffs` and the third one is `downstream_cutoff`. Please run the following command to get helps:
+   The first argument is the name of the function to check. The second argument is the `upstream_cutoffs` and the third one is `downstream_cutoff`. There is also a optional `-e` argument to exclude any functions name you do not want to include in the output. Please run the following command to get helps:
     ```shell script
     ./venv/bin/python build_func_deps_dot.py -h
     ```
