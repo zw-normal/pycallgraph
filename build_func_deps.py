@@ -17,12 +17,12 @@ func_defs = defaultdict(set)
 
 
 class FuncType(Enum):
-    Normal = ('n', 'lightgray')
+    Normal = ('n', 'wheat')
     Class = ('c', 'yellow')
     Property = ('p', 'orchid')
     ClassMethod = ('cm', 'bisque')
     StaticMethod = ('sm', 'lightskyblue')
-    InstanceMethod = ('im', 'wheat')
+    InstanceMethod = ('im', 'lightgray')
 
 
 def is_buildin_func(name):
