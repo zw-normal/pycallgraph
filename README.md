@@ -60,7 +60,7 @@ Currently as some difficulties to config/run `pygraphviz` package on Windows, on
     ```shell script
     ./venv/bin/python build_func_deps_dot.py -h
     ```
-   The output png file(s) and node names in the png file(s) is in the format of `funcname_minargs_maxargs`, as the tool differentiate functions with both their names and the number of arguments. 
+   The output png file(s) and node names in the png file(s) is in the format of `funcname_minargs_maxargs_type`, as the tool differentiate functions with both their names and the number of arguments. 
    
    It is recommended for complex Python code keeping the `upstream_cutoffs` and `downstream_cutoff` lower than 4, or it will take too much time to generate the result. It is also recommended to set one of parameters to 0 if sometimes the output png layout is confusing.
 

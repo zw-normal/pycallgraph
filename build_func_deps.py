@@ -16,12 +16,13 @@ call_graph = nx.DiGraph()
 func_defs = defaultdict(set)
 
 
-class FuncColor(Enum):
-    Normal = 'lightgray'
-    Class = 'yellow'
-    Property = 'orchid'
-    ClassMethod = 'bisque'
-    StaticMethod = 'lightskyblue'
+class FuncType(Enum):
+    Normal = ('n', 'lightgray')
+    Class = ('c', 'yellow')
+    Property = ('p', 'orchid')
+    ClassMethod = ('cm', 'bisque')
+    StaticMethod = ('sm', 'lightskyblue')
+    InstanceMethod = ('im', 'wheat')
 
 
 def is_buildin_func(name):
@@ -29,68 +30,72 @@ def is_buildin_func(name):
 
 
 def get_function_type(func):
+
+    def is_instance_method():
+        args_len = len(func.args.args)
+        if args_len > 0:
+            first_arg = func.args.args[0]
+            if sys.version_info.major >= 3:
+                first_arg = first_arg.arg
+            elif isinstance(first_arg, ast.Name):
+                first_arg = first_arg.id
+            if isinstance(first_arg, str) and first_arg == 'self':
+                return True
+        return False
+
     for decorator in func.decorator_list:
         if isinstance(decorator, ast.Name):
             if decorator.id == 'property':
-                return FuncColor.Property
+                return FuncType.Property
             elif decorator.id == 'classmethod':
-                return FuncColor.ClassMethod
+                return FuncType.ClassMethod
             elif decorator.id == 'staticmethod':
-                return FuncColor.StaticMethod
-    return FuncColor.Normal
+                return FuncType.StaticMethod
+
+    if is_instance_method():
+        return FuncType.InstanceMethod
+    return FuncType.Normal
 
 
 def add_func_node(func):
-    call_graph.add_node(func, shape='box', fillcolor=func.type.value, style='filled')
+    call_graph.add_node(func, shape='box', fillcolor=func.type.value[1], style='filled')
 
 
-def is_class_or_instance_method(arguments):
-    args_len = len(arguments.args)
-    if args_len > 0:
-        first_arg = arguments.args[0]
-        if sys.version_info.major >= 3:
-            first_arg = first_arg.arg
-        elif isinstance(first_arg, ast.Name):
-            first_arg = first_arg.id
-        if isinstance(first_arg, str) and (first_arg == 'cls' or first_arg == 'self'):
-            return True
-    return False
-
-
-def get_min_args(arguments):
-    min_args = len(arguments.args) - len(arguments.defaults)
-    if is_class_or_instance_method(arguments):
+def get_min_args(func, func_type):
+    min_args = len(func.args.args) - len(func.args.defaults)
+    if func_type not in (FuncType.Normal, FuncType.StaticMethod):
         return min_args - 1
     return min_args
 
 
-def get_max_args(arguments):
-    if (arguments.vararg is not None) or \
-            (arguments.kwarg is not None):
+def get_max_args(func, func_type):
+    if (func.args.vararg is not None) or \
+            (func.args.kwarg is not None):
         return float('inf')
-    elif is_class_or_instance_method(arguments):
-        return len(arguments.args) - 1
-    return len(arguments.args)
+    elif func_type not in (FuncType.Normal, FuncType.StaticMethod):
+        return len(func.args.args) - 1
+    return len(func.args.args)
 
 
 class FunctionDef:
 
     def __init__(self, node):
         self.name = node.name
-        self.min_args = get_min_args(node.args)
-        self.max_args = get_max_args(node.args)
         self.type = get_function_type(node)
+        self.min_args = get_min_args(node, self.type)
+        self.max_args = get_max_args(node, self.type)
 
     @classmethod
     def from_class_constructor(cls, node, class_name):
         func_def = cls(node)
         func_def.name = class_name
-        func_def.type = FuncColor.Class
+        func_def.type = FuncType.Class
         return func_def
 
     def __eq__(self, other):
         if isinstance(other, FunctionDef):
             return (self.name == other.name) and \
+                   (self.type == other.type) and \
                    (self.min_args == other.min_args) and \
                    (self.max_args == other.max_args)
 
@@ -98,16 +103,16 @@ class FunctionDef:
         return not self.__eq__(other)
 
     def __hash__(self):
-        return hash((self.name, self.min_args, self.max_args))
+        return hash((self.name, self.type, self.min_args, self.max_args))
 
     def __repr__(self):
-        return '{}_{}_{}'.format(self.name, self.min_args, self.max_args)
+        return '{}_{}_{}_{}'.format(self.name, self.min_args, self.max_args, self.type.value[0])
 
     def output_dot_file_name(self):
-        return '{}_{}_{}.dot'.format(self.name, self.min_args, self.max_args)
+        return '{}_{}_{}_{}.dot'.format(self.name, self.min_args, self.max_args, self.type.value[0])
 
     def output_png_file_name(self):
-        return '{}_{}_{}.png'.format(self.name, self.min_args, self.max_args)
+        return '{}_{}_{}_{}.png'.format(self.name, self.min_args, self.max_args, self.type.value[0])
 
 
 class FunctionDefVisitorPhase1(ast.NodeVisitor):
@@ -163,7 +168,7 @@ class FunctionCallVisitor(ast.NodeVisitor):
     def visit_Attribute(self, node):
         # A attribute access can be a property, just need to check whether we have one defined
         for func in func_defs[node.attr]:
-            if func.type == FuncColor.Property and func.min_args == 0 and func.max_args == 0:
+            if func.type == FuncType.Property and func.min_args == 0 and func.max_args == 0:
                 call_graph.add_edge(self.parent_def, func)
         self.generic_visit(node)
 
