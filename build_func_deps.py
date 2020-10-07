@@ -17,10 +17,6 @@ def is_buildin_func(name):
     return name in __builtins__.__dict__.keys()
 
 
-def is_class(name):
-    return name[0].isupper()
-
-
 def is_class_or_instance_method(arguments):
     args_len = len(arguments.args)
     if args_len > 0:
