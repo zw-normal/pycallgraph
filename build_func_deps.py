@@ -19,6 +19,17 @@ def is_buildin_func(name):
     return name in __builtins__.__dict__.keys()
 
 
+def is_class(name):
+    return name[0].isupper()
+
+
+def add_func_node(func):
+    if is_class(func.name):
+        call_graph.add_node(func, shape='box', fillcolor='yellow', style='filled')
+    else:
+        call_graph.add_node(func, shape='box', fillcolor='lightgray', style='filled')
+
+
 def is_class_or_instance_method(arguments):
     args_len = len(arguments.args)
     if args_len > 0:
@@ -55,11 +66,20 @@ class FunctionDef:
         self.min_args = get_min_args(node.args)
         self.max_args = get_max_args(node.args)
 
+    @classmethod
+    def from_class_constructor(cls, node, class_name):
+        func_def = cls(node)
+        func_def.name = class_name
+        return func_def
+
     def __eq__(self, other):
         if isinstance(other, FunctionDef):
             return (self.name == other.name) and \
                    (self.min_args == other.min_args) and \
                    (self.max_args == other.max_args)
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
     def __hash__(self):
         return hash((self.name, self.min_args, self.max_args))
@@ -78,11 +98,21 @@ class FunctionDefVisitorPhase1(ast.NodeVisitor):
     # Phase 1 is to collect all function defs
     def visit_FunctionDef(self, node):
         func_def = FunctionDef(node)
-        call_graph.add_node(func_def, shape='box', fillcolor='lightgray', style='filled')
+        add_func_node(func_def)
         func_defs[node.name].add(func_def)
 
         self.generic_visit(node)
 
+    def visit_ClassDef(self, node):
+        # We are looking for __init__ method of the class
+        for method in (member for member in node.body if isinstance(member, ast.FunctionDef)):
+            if method.name == '__init__':
+                func_def = FunctionDef.from_class_constructor(method, node.name)
+                add_func_node(func_def)
+                func_defs[node.name].add(func_def)
+                break
+
+        self.generic_visit(node)
 
 class FunctionDefVisitorPhase2(ast.NodeVisitor):
     # Phase 2 is to build the actual call graph
