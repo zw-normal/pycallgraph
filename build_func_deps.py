@@ -105,6 +105,9 @@ class FunctionDef:
     def __hash__(self):
         return hash((self.name, self.type, self.min_args, self.max_args))
 
+    def __str__(self):
+        return '{}_{}_{}'.format(self.name, self.min_args, self.max_args)
+
     def __repr__(self):
         return '{}_{}_{}_{}'.format(self.name, self.min_args, self.max_args, self.type.value[0])
 
