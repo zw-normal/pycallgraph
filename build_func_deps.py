@@ -4,7 +4,6 @@ import ast
 import os
 import pickle
 import sys
-from sys import stdout
 from collections import defaultdict
 
 import networkx as nx
