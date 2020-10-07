@@ -130,6 +130,7 @@ class FunctionDefVisitorPhase1(ast.NodeVisitor):
 
         self.generic_visit(node)
 
+
 class FunctionDefVisitorPhase2(ast.NodeVisitor):
     # Phase 2 is to build the actual call graph
     def visit_FunctionDef(self, node):
