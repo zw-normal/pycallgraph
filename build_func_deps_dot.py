@@ -31,6 +31,9 @@ parser = argparse.ArgumentParser()
 parser.add_argument('func_to_check', help='The name of function to check', type=str)
 parser.add_argument('upstream_cutoffs', help='The cutoff for checking who is calling the func', type=int)
 parser.add_argument('downstream_cutoff', help='The cutoff for checking who the func is calling', type=int)
+parser.add_argument(
+    '-e', '--exclude', help='Comma-separated exclude function names: e.g. save, get_1_1_im',
+    required=False, default="")
 
 if __name__ == '__main__':
     # networkx 2.2 or above, graphviz and pygraphviz are needed to generate dot & png
@@ -38,6 +41,9 @@ if __name__ == '__main__':
     func_to_check = args.func_to_check
     upstream_cutoffs = args.upstream_cutoffs
     downstream_cutoff = args.downstream_cutoff
+    exclude_func_names = set()
+    if args.exclude:
+        exclude_func_names.update((e.strip() for e in args.exclude.split(',')))
 
     call_graph = read_gpickle(input_graph_file)
     with open(input_def_file, 'rb') as input_def_file:
@@ -68,6 +74,9 @@ if __name__ == '__main__':
                 print('More than 200 functions in the graph of {}, '
                       'please reduce upstream_cutoff and/or downstream_cutoff.'.format(func))
             else:
+                if exclude_func_names:
+                    for func_name in exclude_func_names:
+                        path_funcs = filter(lambda f: func_name not in f.name, path_funcs)
                 call_graph = call_graph.subgraph(path_funcs)
 
                 if func in call_graph.nodes:
