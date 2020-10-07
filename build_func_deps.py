@@ -134,8 +134,7 @@ def scan_source_files(visitor):
                     _, ext = os.path.splitext(source_file)
                     if ext == '.py':
                         with open(os.path.join(folder, source_file), 'r') as source:
-                            stdout.write('\r\x1b[KScanning {}'.format(source.name))
-                            stdout.flush()
+                            print('Scanning {}'.format(source.name))
                             ast_tree = ast.parse(source.read())
                             visitor.visit(ast_tree)
 
