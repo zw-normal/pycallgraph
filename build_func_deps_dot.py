@@ -72,20 +72,20 @@ if __name__ == '__main__':
                 path_funcs.update(func_node[1])
             if len(path_funcs) > 200:
                 print('More than 200 functions in the graph of {}, '
-                      'please reduce upstream_cutoff and/or downstream_cutoff.'.format(func))
+                    'please reduce upstream_cutoff and/or downstream_cutoff.'.format(func))
             else:
                 if exclude_func_names:
                     for func_name in exclude_func_names:
                         path_funcs = filter(lambda f: func_name not in f.name, path_funcs)
-                call_graph = call_graph.subgraph(path_funcs)
+                result_call_graph = call_graph.subgraph(path_funcs)
 
                 if func in call_graph.nodes:
-                    set_color_of_node(call_graph, func, 'greenyellow')
+                    set_color_of_node(result_call_graph, func, 'greenyellow')
 
                 output_dot_file = os.path.join(output_folder, func.output_dot_file_name())
                 output_png_file = os.path.join(output_folder, func.output_png_file_name())
 
-                write_dot(call_graph, output_dot_file)
+                write_dot(result_call_graph, output_dot_file)
                 with open(output_png_file, "wb") as output:
                     subprocess.Popen(
                         ['dot', '-Tpng', output_dot_file], stdout=output)

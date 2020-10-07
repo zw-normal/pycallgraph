@@ -2,7 +2,8 @@ import os
 
 # Roots path of the python source code
 roots = [
-    '/Users/weizheng/Programming/Python/coveragepy',
+    '/home/weizheng/xplan/lib',
+    '/home/weizheng/xplan/src'
 ]
 
 # Output folder
