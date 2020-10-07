@@ -1,7 +1,10 @@
+# -*- coding: utf-8 -*-
+
 import ast
 import os
 import pickle
 import sys
+from sys import stdout
 from collections import defaultdict
 
 import networkx as nx
@@ -123,14 +126,16 @@ class FunctionCallVisitor(ast.NodeVisitor):
 
 def scan_source_files(visitor):
     for root in roots:
-        for folder, next_folders, files in os.walk(root):
-            for file in files:
+        for folder, _, files in os.walk(root):
+            for source_file in files:
                 if ('xtest' not in folder) and \
                         ('test' not in folder) and \
-                        ('test' not in file):
-                    _, ext = os.path.splitext(file)
+                        ('test' not in source_file):
+                    _, ext = os.path.splitext(source_file)
                     if ext == '.py':
-                        with open(os.path.join(folder, file), 'r') as source:
+                        with open(os.path.join(folder, source_file), 'r') as source:
+                            stdout.write('\r\x1b[KScanning {}'.format(source.name))
+                            stdout.flush()
                             ast_tree = ast.parse(source.read())
                             visitor.visit(ast_tree)
 
