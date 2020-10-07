@@ -37,8 +37,6 @@ def get_function_type(func):
                 return FuncColor.ClassMethod
             elif decorator.id == 'staticmethod':
                 return FuncColor.StaticMethod
-    if func.name[0].isupper():
-        return FuncColor.Class
     return FuncColor.Normal
 
 
@@ -87,6 +85,7 @@ class FunctionDef:
     def from_class_constructor(cls, node, class_name):
         func_def = cls(node)
         func_def.name = class_name
+        func_def.type = FuncColor.Class
         return func_def
 
     def __eq__(self, other):
