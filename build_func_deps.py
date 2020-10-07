@@ -4,6 +4,7 @@ import ast
 import os
 import pickle
 import sys
+from enum import Enum
 from collections import defaultdict
 
 import networkx as nx
@@ -15,19 +16,34 @@ call_graph = nx.DiGraph()
 func_defs = defaultdict(set)
 
 
+class FuncColor(Enum):
+    Normal = 'lightgray'
+    Class = 'yellow'
+    Property = 'orchid'
+    ClassMethod = 'bisque'
+    StaticMethod = 'lightskyblue'
+
+
 def is_buildin_func(name):
     return name in __builtins__.__dict__.keys()
 
 
-def is_class(name):
-    return name[0].isupper()
+def get_function_type(func):
+    for decorator in func.decorator_list:
+        if isinstance(decorator, ast.Name):
+            if decorator.id == 'property':
+                return FuncColor.Property
+            elif decorator.id == 'classmethod':
+                return FuncColor.ClassMethod
+            elif decorator.id == 'staticmethod':
+                return FuncColor.StaticMethod
+    if func.name[0].isupper():
+        return FuncColor.Class
+    return FuncColor.Normal
 
 
 def add_func_node(func):
-    if is_class(func.name):
-        call_graph.add_node(func, shape='box', fillcolor='yellow', style='filled')
-    else:
-        call_graph.add_node(func, shape='box', fillcolor='lightgray', style='filled')
+    call_graph.add_node(func, shape='box', fillcolor=func.type.value, style='filled')
 
 
 def is_class_or_instance_method(arguments):
@@ -65,6 +81,7 @@ class FunctionDef:
         self.name = node.name
         self.min_args = get_min_args(node.args)
         self.max_args = get_max_args(node.args)
+        self.type = get_function_type(node)
 
     @classmethod
     def from_class_constructor(cls, node, class_name):
@@ -141,6 +158,13 @@ class FunctionCallVisitor(ast.NodeVisitor):
                 if (call_args_length >= func.min_args) and (
                         call_args_length <= func.max_args):
                     call_graph.add_edge(self.parent_def, func)
+        self.generic_visit(node)
+
+    def visit_Attribute(self, node):
+        # A attribute access can be a property, just need to check whether we have one defined
+        for func in func_defs[node.attr]:
+            if func.min_args == 0 and func.max_args == 0:
+                call_graph.add_edge(self.parent_def, func)
         self.generic_visit(node)
 
     def visit_FunctionDef(self, node):
