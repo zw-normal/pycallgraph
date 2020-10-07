@@ -47,7 +47,7 @@ Currently as some difficulties to config/run `pygraphviz` package on Windows, on
     sudo apt-get install python3-dev graphviz libgraphviz-dev pkg-config
     ./venv/bin/pip install pygraphviz
     ```
-7. Now the environment is ready, need to change the `build_func_deps_config.py` to setup output folder.
+7. Now the environment is ready, need to change the `build_func_deps_config.py` to setup output folder and mostly importantly the folders of the source code `root` to scan for building the graph.
 8. Run the following command to generate & save the whole call graphs of the source code to the output folder:
     ```shell script
     ./venv/bin/python build_func_deps.py
