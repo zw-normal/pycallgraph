@@ -162,7 +162,7 @@ class FunctionCallVisitor(ast.NodeVisitor):
     def visit_Attribute(self, node):
         # A attribute access can be a property, just need to check whether we have one defined
         for func in func_defs[node.attr]:
-            if func.min_args == 0 and func.max_args == 0:
+            if func.type == FuncColor.Property and func.min_args == 0 and func.max_args == 0:
                 call_graph.add_edge(self.parent_def, func)
         self.generic_visit(node)
 
