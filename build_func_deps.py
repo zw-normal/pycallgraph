@@ -12,6 +12,7 @@ from networkx.readwrite.gpickle import write_gpickle
 
 from build_func_deps_config import roots, output_folder
 
+
 call_graph = nx.DiGraph()
 func_defs = defaultdict(set)
 
@@ -72,9 +73,11 @@ def get_max_args(func, func_type):
     if (func.args.vararg is not None) or \
             (func.args.kwarg is not None):
         return float('inf')
-    elif func_type not in (FuncType.Normal, FuncType.StaticMethod):
-        return len(func.args.args) - 1
-    return len(func.args.args)
+
+    max_args = len(func.args.args)
+    if func_type not in (FuncType.Normal, FuncType.StaticMethod):
+        return max_args - 1
+    return max_args
 
 
 class FunctionDef:
@@ -120,15 +123,17 @@ class FunctionDef:
 
 class FunctionDefVisitorPhase1(ast.NodeVisitor):
     # Phase 1 is to collect all function defs
+
     def visit_FunctionDef(self, node):
-        func_def = FunctionDef(node)
-        add_func_node(func_def)
-        func_defs[node.name].add(func_def)
+        if node.name != '__init__':
+            # visit_ClassDef handles the constructor
+            func_def = FunctionDef(node)
+            add_func_node(func_def)
+            func_defs[node.name].add(func_def)
 
         self.generic_visit(node)
 
     def visit_ClassDef(self, node):
-        # We are looking for __init__ method of the class
         for method in (member for member in node.body if isinstance(member, ast.FunctionDef)):
             if method.name == '__init__':
                 func_def = FunctionDef.from_class_constructor(method, node.name)
@@ -140,18 +145,31 @@ class FunctionDefVisitorPhase1(ast.NodeVisitor):
 
 
 class FunctionDefVisitorPhase2(ast.NodeVisitor):
-    # Phase 2 is to build the actual call graph
+    # Phase 2 is to build the call graph
     def visit_FunctionDef(self, node):
-        func_call_visitor = FunctionCallVisitor(node)
-        func_call_visitor.visit(node)
+        if node.name != '__init__':
+            # As phase 1, visit_ClassDef handles the constructor
+            func_def = FunctionDef(node)
+            func_call_visitor = FunctionCallVisitor(node, func_def)
+            func_call_visitor.visit(node)
+
+        self.generic_visit(node)
+
+    def visit_ClassDef(self, node):
+        for method in (member for member in node.body if isinstance(member, ast.FunctionDef)):
+            if method.name == '__init__':
+                func_def = FunctionDef.from_class_constructor(method, node.name)
+                func_call_visitor = FunctionCallVisitor(method, func_def)
+                func_call_visitor.visit(method)
+                break
         self.generic_visit(node)
 
 
 class FunctionCallVisitor(ast.NodeVisitor):
 
-    def __init__(self, parent):
-        self.parent = parent
-        self.parent_def = FunctionDef(parent)
+    def __init__(self, caller, caller_def):
+        self.caller = caller
+        self.caller_def = caller_def
 
     def visit_Call(self, node):
         # Caller -> Callee
@@ -165,23 +183,23 @@ class FunctionCallVisitor(ast.NodeVisitor):
             for func in func_defs[func_name]:
                 if (call_args_length >= func.min_args) and (
                         call_args_length <= func.max_args):
-                    call_graph.add_edge(self.parent_def, func)
+                    call_graph.add_edge(self.caller_def, func)
         self.generic_visit(node)
 
     def visit_Attribute(self, node):
         # A attribute access can be a property, just need to check whether we have one defined
         for func in func_defs[node.attr]:
             if func.type == FuncType.Property and func.min_args == 0 and func.max_args == 0:
-                call_graph.add_edge(self.parent_def, func)
+                call_graph.add_edge(self.caller_def, func)
         self.generic_visit(node)
 
     def visit_FunctionDef(self, node):
         # Do not iterate 'def func' in func
-        if node == self.parent:
+        if node == self.caller:
             self.generic_visit(node)
 
     def visit_ClassDef(self, node):
-        # Do not iterate 'methods of inner class' in func
+        # Do not iterate 'inner class' in func
         pass
 
 
