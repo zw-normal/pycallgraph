@@ -60,8 +60,9 @@ Currently as some difficulties to config/run `pygraphviz` package on Windows, on
     ```shell script
     ./venv/bin/python build_func_deps_dot.py -h
     ```
-   The output png file(s) in the png file(s) is in the format of `funcname_minargs_maxargs_type`, as the tool differentiate functions with both their names and the number of arguments. The node name(s) in the graph is in the format of `funcname_minargs_maxargs`, and use different colors to represent different function types (`wheat` for normal function, `yellow` for class, `orchid` for property, `bisque` for class method, `lightskyblue` for static method and `lightgray` for instance method).
+   The output png file(s) in the png file(s) is in the format of `funcname-source_lineno_coloffset`, as the tool differentiate function definitions with those info (small chances of conflicts as we only use base name from source name when generating output files). The node name(s) in the graph is in the format of `funcname (source lineno)`, and use different colors to represent different function types (`wheat` for normal function, `yellow` for class, `orchid` for property, `bisque` for class method, `lightskyblue` for static method and `lightgray` for instance method).
    
    It is recommended for complex Python code keeping the `upstream_cutoffs` and `downstream_cutoff` lower than 4, or it will take too much time to generate the result. It is also recommended to set one of parameters to 0 if sometimes the output png layout is confusing.
 
-10. From now on repeat step 9 to inspect any other functions. If you want to re-build the whole call graphs, just run step 8 again.
+10. From now on repeat step 9 to inspect any other functions. If you want to re-build the whole call graphs, just run step 8 again. Note unnecessary links can be present in the graph as we cannot differentiate functions from the calling side if there are functions who have the same name.
+  
