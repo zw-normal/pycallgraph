@@ -115,7 +115,7 @@ class FunctionDef:
         return hash((self.source, self.lineno, self.col_offset))
 
     def __repr__(self):
-        return '{} ({} {})'.format(self.name, self.get_base_source_name(), self.lineno)
+        return '{} ({} L{} C{})'.format(self.name, self.source, self.lineno, self.col_offset)
 
     def get_base_source_name(self):
         return os.path.basename(self.source)
