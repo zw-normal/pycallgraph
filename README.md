@@ -65,4 +65,3 @@ Currently as some difficulties to config/run `pygraphviz` package on Windows, on
    It is recommended for complex Python code keeping the `upstream_cutoffs` and `downstream_cutoff` lower than 4, or it will take too much time to generate the result. It is also recommended to set one of parameters to 0 if sometimes the output png layout is confusing.
 
 10. From now on repeat step 9 to inspect any other functions. If you want to re-build the whole call graphs, just run step 8 again. Note unnecessary links can be present in the graph as we cannot differentiate functions from the calling side if there are functions who have the same name.
-  
