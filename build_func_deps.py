@@ -61,7 +61,7 @@ def get_function_type(func):
 def add_func_node(func):
     call_graph.add_node(
         func, label='<{}<BR/><FONT POINT-SIZE="10">{} L{}</FONT>>'.format(
-            func.name, func.get_base_source_name(), func.lineno),
+            func.name, get_base_source_name(func.source), func.lineno),
         shape='box', fillcolor=func.type.value[1], style='filled')
 
 
@@ -81,6 +81,10 @@ def get_max_args(func, func_type):
     if func_type not in (FuncType.Normal, FuncType.StaticMethod):
         return max_args - 1
     return max_args
+
+
+def get_base_source_name(source):
+    return os.path.basename(source)
 
 
 class FunctionDef:
@@ -117,14 +121,13 @@ class FunctionDef:
     def __repr__(self):
         return '{} ({} L{} C{})'.format(self.name, self.source, self.lineno, self.col_offset)
 
-    def get_base_source_name(self):
-        return os.path.basename(self.source)
-
     def output_dot_file_name(self):
-        return '{}-{}_{}_{}.dot'.format(self.name, self.get_base_source_name()[0:-3], self.lineno, self.col_offset)
+        return '{}-{}_{}_{}.dot'.format(
+            self.name, get_base_source_name(self.source)[0:-3], self.lineno, self.col_offset)
 
     def output_png_file_name(self):
-        return '{}-{}_{}_{}.png'.format(self.name, self.get_base_source_name()[0:-3], self.lineno, self.col_offset)
+        return '{}-{}_{}_{}.png'.format(
+            self.name, get_base_source_name(self.source)[0:-3], self.lineno, self.col_offset)
 
 
 class FunctionDefVisitorPhase1(ast.NodeVisitor):
@@ -163,7 +166,7 @@ class FunctionDefVisitorPhase2(ast.NodeVisitor):
         if node.name != '__init__':
             # As phase 1, visit_ClassDef handles the constructor
             func_def = FunctionDef(self.source, node)
-            func_call_visitor = FunctionCallVisitor(node, func_def)
+            func_call_visitor = FunctionCallVisitor(self.source, node, func_def)
             func_call_visitor.visit(node)
 
         self.generic_visit(node)
@@ -172,7 +175,7 @@ class FunctionDefVisitorPhase2(ast.NodeVisitor):
         for method in (member for member in node.body if isinstance(member, ast.FunctionDef)):
             if method.name == '__init__':
                 func_def = FunctionDef.from_class_constructor(self.source, method, node.name)
-                func_call_visitor = FunctionCallVisitor(method, func_def)
+                func_call_visitor = FunctionCallVisitor(self.source, method, func_def)
                 func_call_visitor.visit(method)
                 break
         self.generic_visit(node)
@@ -180,7 +183,8 @@ class FunctionDefVisitorPhase2(ast.NodeVisitor):
 
 class FunctionCallVisitor(ast.NodeVisitor):
 
-    def __init__(self, caller, caller_def):
+    def __init__(self, source, caller, caller_def):
+        self.source = source
         self.caller = caller
         self.caller_def = caller_def
 
@@ -195,7 +199,9 @@ class FunctionCallVisitor(ast.NodeVisitor):
             call_args_length = len(node.args) + len(node.keywords)
             for func in func_defs[func_name]:
                 if (call_args_length >= func.min_args) and (call_args_length <= func.max_args):
-                    call_graph.add_edge(self.caller_def, func)
+                    call_graph.add_edge(
+                        self.caller_def, func,
+                        label='L{}'.format(node.lineno))
         self.generic_visit(node)
 
     def visit_Attribute(self, node):
@@ -204,7 +210,9 @@ class FunctionCallVisitor(ast.NodeVisitor):
             if (func.type == FuncType.Property) and (
                     func.min_args == 0) and (
                     func.max_args == 0):
-                call_graph.add_edge(self.caller_def, func)
+                call_graph.add_edge(
+                    self.caller_def, func,
+                    label='L{}'.format(node.lineno))
         self.generic_visit(node)
 
     def visit_FunctionDef(self, node):
