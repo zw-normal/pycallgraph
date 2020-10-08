@@ -81,7 +81,7 @@ if __name__ == '__main__':
     func_defs_len = len(func_defs[func_to_check])
     if func_defs_len == 0:
         print('Function {} is not found in the graph.'.format(func_to_check))
-    elif func_defs_len > 6:
+    elif func_defs_len > 8:
         print('Function {} has more than 6 different definitions. '
               'May pick another function to check.'.format(func_to_check))
     else:
