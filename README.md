@@ -25,8 +25,9 @@ Currently as some difficulties to config/run `pygraphviz` package on Windows, on
     ```
 3. Create virtualenv according to python version:
     ```shell script
-    virtualenv ./venv
+    virtualenv -p /home/username/opt/python-2.7.15/bin/python venv
     ```
+    Please run according to python version needed.
 4. Upgrade pip in virtual environment to the latest version:
     ```shell script
     ./venv/bin/python -m pip install –upgrade pip
