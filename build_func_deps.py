@@ -4,13 +4,14 @@ import ast
 import os
 import pickle
 import sys
+import fnmatch
 from enum import Enum
 from collections import defaultdict
 
 import networkx as nx
 from networkx.readwrite.gpickle import write_gpickle
 
-from build_func_deps_config import roots, output_folder
+from build_func_deps_config import source_roots, exclude_folders, output_folder
 
 
 call_graph = nx.DiGraph()
@@ -233,19 +234,16 @@ class FunctionCallVisitor(ast.NodeVisitor):
 
 
 def scan_source_files(visitor_cls):
-    for root in roots:
-        for folder, _, files in os.walk(root):
+    for source_root in source_roots:
+        for folder, dirs, files in os.walk(source_root):
+            dirs[:] = [d for d in dirs if not exclude_folders]
             for source_file in files:
-                if ('xtest' not in folder) and \
-                        ('test' not in folder) and \
-                        ('test' not in source_file):
-                    _, ext = os.path.splitext(source_file)
-                    if ext == '.py':
-                        with open(os.path.join(folder, source_file), 'r') as source:
-                            print('Scanning {}'.format(source.name))
-                            ast_tree = ast.parse(source.read())
-                            visitor = visitor_cls(source.name)
-                            visitor.visit(ast_tree)
+                if fnmatch.fnmatch(source_file, '*.py') and ('test' not in source_file):
+                    with open(os.path.join(folder, source_file), 'r') as source:
+                        print('Scanning {}'.format(source.name))
+                        ast_tree = ast.parse(source.read())
+                        visitor = visitor_cls(source.name)
+                        visitor.visit(ast_tree)
 
 
 output_graph_file = os.path.join(output_folder, 'build_func_deps.graph')
