@@ -10,7 +10,7 @@ source_roots = (
 
 # Exclude folders
 exclude_folders = (
-    'xtest', 'test'
+    'xtest', 'test',
 )
 
 # Output folder
