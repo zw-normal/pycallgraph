@@ -54,8 +54,8 @@ def generate_dot_png():
         path_funcs.update(func_node[1])
     for func_node in downstream_paths.items():
         path_funcs.update(func_node[1])
-    if len(path_funcs) > 200:
-        print('More than 200 functions in the graph of {}, '
+    if len(path_funcs) > 150:
+        print('More than 150 functions in the graph of {}, '
               'please reduce upstream_cutoff and/or downstream_cutoff.'.format(func))
     else:
         if exclude_func_names:
@@ -77,7 +77,6 @@ def generate_dot_png():
 if __name__ == '__main__':
     # networkx 2.2 or above, graphviz and pygraphviz are needed to generate dot & png
 
-    # 2. Generate the dot and png
     func_defs_len = len(func_defs[func_to_check])
     if func_defs_len == 0:
         print('Function {} is not found in the graph.'.format(func_to_check))

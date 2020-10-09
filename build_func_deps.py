@@ -204,16 +204,17 @@ class FunctionCallVisitor(ast.NodeVisitor):
                         label='L{}'.format(node.lineno))
         self.generic_visit(node)
 
-    def visit_Attribute(self, node):
-        # A attribute access can be a property, just need to check whether we have one defined
-        for func in func_defs[node.attr]:
-            if (func.type == FuncType.Property) and (
-                    func.min_args == 0) and (
-                    func.max_args == 0):
-                call_graph.add_edge(
-                    self.caller_def, func,
-                    label='L{}'.format(node.lineno))
-        self.generic_visit(node)
+    # def visit_Attribute(self, node):
+    #     # Looks like property supporting is time consumming, and not quite useful, let us turn it off for now
+    #     # A attribute access can be a property, just need to check whether we have one defined
+    #     for func in func_defs[node.attr]:
+    #         if (func.type == FuncType.Property) and (
+    #                 func.min_args == 0) and (
+    #                 func.max_args == 0):
+    #             call_graph.add_edge(
+    #                 self.caller_def, func,
+    #                 label='L{}'.format(node.lineno))
+    #     self.generic_visit(node)
 
     def visit_FunctionDef(self, node):
         # Do not iterate 'def func' in func
