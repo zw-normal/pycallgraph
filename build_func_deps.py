@@ -236,7 +236,7 @@ class FunctionCallVisitor(ast.NodeVisitor):
 def scan_source_files(visitor_cls):
     for source_root in source_roots:
         for folder, dirs, files in os.walk(source_root):
-            dirs[:] = [d for d in dirs if not exclude_folders]
+            dirs[:] = [d for d in dirs if d not in exclude_folders]
             for source_file in files:
                 if fnmatch.fnmatch(source_file, '*.py') and ('test' not in source_file):
                     with open(os.path.join(folder, source_file), 'r') as source:
