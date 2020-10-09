@@ -2,9 +2,9 @@
 
 The project uses Python ast module and simple algorithm (but effective) to generate static call graph of Python code. Basically it uses source code information (source file name, line no and col offset) when deciding function definition, but on the calling side, it only consider function names and the number of arguments when adding graph edges. Because nature of this comparison, this tool may **add extra (wrong) calling edges** for a function with common name (e.g. `save`, `load` etc.) in the graph, although considering arguments can alleviate this issue. It works well with functions that has more specific name (e.g. `load_plugins` etc.).
 
-The code and dependencies can be easily adjusted to work with both Python 2.7 or Python 3, but needs to make sure to pickup the right Python version when analysing source code. In other words, should match the Python version which is used by source code, or the ast module will report syntax error when trying to parse the source code files.
+The code and dependencies can be easily adjusted to work with both Python 2.7 or Python 3, but make sure to pickup the Python version matching source code (e.g. do not use Python 2 ast to analyse Python 3, or vise verse.)
 
-NOTE: The purpose of the code is not to achieve absolutely accurate (actually it is impossible), but to provide auxiliary to work with other methods (like code intelligence of IDE) to give a more comprehensive and convenient picture of the Python code.
+NOTE: The purpose is not to achieve absolutely accurate (actually it is impossible), but to provide auxiliary tool to give a more comprehensive and convenient picture of the Python code base.
 
 ## Example
 The following example is the result of checking `load_plugins` function of the open source project: https://github.com/nedbat/coveragepy:
@@ -23,20 +23,20 @@ Currently as some difficulties to config/run `pygraphviz` package on Windows, on
     ```shell script
     python --version
     ```
-3. Create virtualenv according to python version:
+3. Create virtualenv according to Python version:
     ```shell script
     virtualenv -p /home/username/opt/python-2.7.15/bin/python venv
     ```
-    Please run according to python version needed.
+    Please run according to Python version needed.
 4. Upgrade pip in virtual environment to the latest version:
     ```shell script
     ./venv/bin/python -m pip install --upgrade pip
     ```
-5. Install networkx package:
+5. Install `networkx` package:
     ```shell script
     ./venv/bin/pip install networkx
     ```
-6. Install pygraphviz (please choose python version according to your needs):
+6. Install `pygraphviz` (please choose Python version according to your needs):
     * Python 2
     ```shell script
     sudo apt-get install python-dev graphviz libgraphviz-dev pkg-config
@@ -48,12 +48,12 @@ Currently as some difficulties to config/run `pygraphviz` package on Windows, on
     sudo apt-get install python3-dev graphviz libgraphviz-dev pkg-config
     ./venv/bin/pip install pygraphviz
     ```
-7. Now the environment is ready, copy `build_func_deps_config.example.py` to `build_func_deps_config.py` and setup output folder, as well as the prefer source code folders (`roots` list) for scanning in the `build_func_deps_config.py` file.
+7. Now the environment is ready, copy `build_func_deps_config.example.py` to `build_func_deps_config.py` and setup output folder, as well as the prefer source code folders (`source_roots` list), and `exclude_folders` in it.
 8. Run the following command to generate & save the whole call graphs of the source code to the output folder:
     ```shell script
     ./venv/bin/python build_func_deps.py
     ```
-9. Now run the following command to generate the png file for the function to be inspected by `func_to_check` setting in `build_func_deps_config.py`:
+9. Run the following command to generate the png file for the function to be inspected:
     ```shell script
     ./venv/bin/python build_func_deps_dot.py 'load_plugins' 3 0
     ```
@@ -61,10 +61,10 @@ Currently as some difficulties to config/run `pygraphviz` package on Windows, on
     ```shell script
     ./venv/bin/python build_func_deps_dot.py -h
     ```
-   The output png file(s) in the png file(s) is in the format of `funcname-source_lineno_coloffset`, as the tool differentiate function definitions with those info (small chances of conflicts as we only use base name from source name when generating output files). The node name(s) in the graph is in the format of `funcname (source lineno)`, and use different colors to represent different function types (`wheat` for normal function, `yellow` for class, `orchid` for property - support turned off for speeding up, `bisque` for class method, `lightskyblue` for static method and `lightgray` for instance method).
+   The output png file(s) in the png file(s) is in the format of `funcname-source_lineno_coloffset`, as the tool differentiate function definitions with those info (small chances of conflicts as we only use base name of the source file when generating output). The node name(s) in the graph is in the format of `funcname (source lineno)`, and use different colors to represent different function types (`wheat` for normal function, `yellow` for class, `orchid` for property - support is turned off for speeding up, `bisque` for class method, `lightskyblue` for static method and `lightgray` for instance method).
    
-   NOTE: All line numbers and col offsets are estimated, because source code changed quite often, and those numbers have already been decided when building the graph. To update them, need to redo the step 8 based on the latest code.
+   NOTE: All line numbers and col offsets are estimated, because source code may be changed quite often, and those numbers have already been decided when building the graph. To update them, need to redo the step 8 based on the latest source code.
    
    It is recommended for complex Python code keeping the `upstream_cutoffs` and `downstream_cutoff` lower than 4, or it will take too much time to generate the result. It is also recommended to set one of parameters to 0 if sometimes the output png layout is confusing.
 
-10. From now on repeat step 9 to inspect any other functions. If you want to re-build the whole call graphs, just run step 8 again. Note unnecessary links can be present in the graph as we cannot differentiate functions from the calling side if there are functions who have the same name.
+10. From now on repeat step 9 to inspect any other functions. If you want to re-build the whole call graphs, just run step 8 again. Note unnecessary links can be present in the graph as we cannot differentiate functions from the calling side if there are functions having the same name, and the number of arguments matched.
