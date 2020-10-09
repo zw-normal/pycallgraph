@@ -31,7 +31,6 @@ def is_buildin_func(name):
 
 
 def get_function_type(func):
-
     def is_instance_method():
         args_len = len(func.args.args)
         if args_len > 0:
@@ -58,11 +57,35 @@ def get_function_type(func):
     return FuncType.Normal
 
 
-def add_func_node(func):
+def record_func_def(func_def):
     call_graph.add_node(
-        func, label='<{}<BR/><FONT POINT-SIZE="10">{} L{}</FONT>>'.format(
-            func.name, get_base_source_name(func.source), func.lineno),
-        shape='box', fillcolor=func.type.value[1], style='filled')
+        func_def, label='<{}<BR/><FONT POINT-SIZE="10">{} L{}</FONT>>'.format(
+            func_def.name, get_base_source_name(func_def.source), func_def.lineno),
+        shape='box', fillcolor=func_def.type.value[1], style='filled')
+    func_defs[func_def.name].add(func_def)
+
+
+def inspect_func_call(source, func, func_def):
+    func_call_visitor = FunctionCallVisitor(source, func, func_def)
+    func_call_visitor.visit(func)
+
+
+def get_func_callee_name(callee):
+    if isinstance(callee.func, ast.Attribute):
+        return callee.func.attr
+    elif isinstance(callee.func, ast.Name):
+        return callee.func.id
+    return None
+
+
+def record_func_call(caller_def, callee):
+    # Caller -> Callee
+    func_name = get_func_callee_name(callee)
+    if (func_name is not None) and (not is_buildin_func(func_name)):
+        call_args_length = len(callee.args) + len(callee.keywords)
+        for func_def in func_defs[func_name]:
+            if (call_args_length >= func_def.min_args) and (call_args_length <= func_def.max_args):
+                call_graph.add_edge(caller_def, func_def, label='L{}'.format(callee.lineno))
 
 
 def get_min_args(func, func_type):
@@ -139,18 +162,15 @@ class FunctionDefVisitorPhase1(ast.NodeVisitor):
     def visit_FunctionDef(self, node):
         if node.name != '__init__':
             # visit_ClassDef handles the constructor
-            func_def = FunctionDef(self.source, node)
-            add_func_node(func_def)
-            func_defs[node.name].add(func_def)
+            record_func_def(FunctionDef(self.source, node))
 
         self.generic_visit(node)
 
     def visit_ClassDef(self, node):
         for method in (member for member in node.body if isinstance(member, ast.FunctionDef)):
             if method.name == '__init__':
-                func_def = FunctionDef.from_class_constructor(self.source, method, node.name)
-                add_func_node(func_def)
-                func_defs[node.name].add(func_def)
+                record_func_def(
+                    FunctionDef.from_class_constructor(self.source, method, node.name))
                 break
 
         self.generic_visit(node)
@@ -165,18 +185,15 @@ class FunctionDefVisitorPhase2(ast.NodeVisitor):
     def visit_FunctionDef(self, node):
         if node.name != '__init__':
             # As phase 1, visit_ClassDef handles the constructor
-            func_def = FunctionDef(self.source, node)
-            func_call_visitor = FunctionCallVisitor(self.source, node, func_def)
-            func_call_visitor.visit(node)
-
+            inspect_func_call(self.source, node, FunctionDef(self.source, node))
         self.generic_visit(node)
 
     def visit_ClassDef(self, node):
         for method in (member for member in node.body if isinstance(member, ast.FunctionDef)):
             if method.name == '__init__':
-                func_def = FunctionDef.from_class_constructor(self.source, method, node.name)
-                func_call_visitor = FunctionCallVisitor(self.source, method, func_def)
-                func_call_visitor.visit(method)
+                inspect_func_call(
+                    self.source, method,
+                    FunctionDef.from_class_constructor(self.source, method, node.name))
                 break
         self.generic_visit(node)
 
@@ -190,18 +207,7 @@ class FunctionCallVisitor(ast.NodeVisitor):
 
     def visit_Call(self, node):
         # Caller -> Callee
-        func_name = None
-        if isinstance(node.func, ast.Attribute):
-            func_name = node.func.attr
-        elif isinstance(node.func, ast.Name):
-            func_name = node.func.id
-        if (func_name is not None) and (not is_buildin_func(func_name)):
-            call_args_length = len(node.args) + len(node.keywords)
-            for func in func_defs[func_name]:
-                if (call_args_length >= func.min_args) and (call_args_length <= func.max_args):
-                    call_graph.add_edge(
-                        self.caller_def, func,
-                        label='L{}'.format(node.lineno))
+        record_func_call(self.caller_def, node)
         self.generic_visit(node)
 
     # def visit_Attribute(self, node):

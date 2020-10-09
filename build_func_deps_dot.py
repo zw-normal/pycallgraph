@@ -40,7 +40,7 @@ if args.exclude:
     exclude_func_names.update((e.strip() for e in args.exclude.split(',')))
 
 
-def generate_dot_png():
+def get_path_funcs():
     upstream_paths = {}
     downstream_paths = {}
     if upstream_cutoffs > 0:
@@ -49,19 +49,26 @@ def generate_dot_png():
     if downstream_cutoff > 0:
         downstream_paths = nx.single_source_shortest_path(
             call_graph, func, cutoff=downstream_cutoff)
+
     path_funcs = set()
     for func_node in upstream_paths.items():
         path_funcs.update(func_node[1])
     for func_node in downstream_paths.items():
         path_funcs.update(func_node[1])
+    if exclude_func_names:
+        for func_name in exclude_func_names:
+            if func_name != func_to_check:
+                path_funcs = filter(lambda f: func_name not in f.name, path_funcs)
+
+    return path_funcs
+
+
+def generate_dot_png():
+    path_funcs = get_path_funcs()
     if len(path_funcs) > 150:
         print('More than 150 functions in the graph of {}, '
               'please reduce upstream_cutoff and/or downstream_cutoff.'.format(func))
     else:
-        if exclude_func_names:
-            for func_name in exclude_func_names:
-                if func_name != func_to_check:
-                    path_funcs = filter(lambda f: func_name not in f.name, path_funcs)
         func_call_graph = call_graph.subgraph(path_funcs)
         func_call_graph.nodes[func]['fillcolor'] = 'greenyellow'
 
