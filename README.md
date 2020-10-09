@@ -30,7 +30,7 @@ Currently as some difficulties to config/run `pygraphviz` package on Windows, on
     Please run according to python version needed.
 4. Upgrade pip in virtual environment to the latest version:
     ```shell script
-    ./venv/bin/python -m pip install -upgrade pip
+    ./venv/bin/python -m pip install --upgrade pip
     ```
 5. Install networkx package:
     ```shell script
