@@ -35,7 +35,7 @@ Currently as some difficulties to config/run `pygraphviz` package on Windows, on
     ```shell script
     ./venv/bin/pip install networkx
     ```
-6. Install pygraphviz:
+6. Install pygraphviz (please choose python version according to your needs):
     * Python 2
     ```shell script
     sudo apt-get install python-dev graphviz libgraphviz-dev pkg-config
