@@ -63,6 +63,8 @@ Currently as some difficulties to config/run `pygraphviz` package on Windows, on
     ```
    The output png file(s) in the png file(s) is in the format of `funcname-source_lineno_coloffset`, as the tool differentiate function definitions with those info (small chances of conflicts as we only use base name of the source file when generating output). The node name(s) in the graph is in the format of `funcname (source lineno)`, and use different colors to represent different function types (`wheat` for normal function, `yellow` for class, `orchid` for property - support is turned off for speeding up, `bisque` for class method, `lightskyblue` for static method and `lightgray` for instance method).
    
+   The source info on the node represents which source file on which line the function is defined, and the line number on the edge represents on which line the target function is called.
+   
    NOTE: All line numbers and col offsets are estimated, because source code may be changed quite often, and those numbers have already been decided when building the graph. To update them, need to redo the step 8 based on the latest source code.
    
    It is recommended for complex Python code keeping the `upstream_cutoffs` and `downstream_cutoff` lower than 4, or it will take too much time to generate the result. It is also recommended to set one of parameters to 0 if sometimes the output png layout is confusing.
