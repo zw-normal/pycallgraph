@@ -205,7 +205,7 @@ class FunctionCallVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
     # def visit_Attribute(self, node):
-    #     # Looks like property supporting is time consumming, and not quite useful, let us turn it off for now
+    #     # Looks like property supporting is time consuming, and not quite useful, let us turn it off for now
     #     # A attribute access can be a property, just need to check whether we have one defined
     #     for func in func_defs[node.attr]:
     #         if (func.type == FuncType.Property) and (
