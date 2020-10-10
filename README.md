@@ -48,7 +48,7 @@ Currently as some difficulties to config/run `pygraphviz` package on Windows, on
     sudo apt-get install python3-dev graphviz libgraphviz-dev pkg-config
     ./venv/bin/pip install pygraphviz
     ```
-7. Now the environment is ready, copy `build_func_deps_config.example.py` to `build_func_deps_config.py` and setup output folder, as well as the prefer source code folders (`source_roots` list), and `exclude_folders` in it.
+7. Now the environment is ready, copy `build_func_deps_config.example.py` to `build_func_deps_config.py` and setup output folder, the source code folders (`source_roots` list), `exclude_folders` and `function_name_threahold` in it. `function_name_threahold` defines if a common function names appear too many times, it will be excluded from the graph.
 8. Run the following command to generate & save the whole call graphs of the source code to the output folder:
     ```shell script
     ./venv/bin/python build_func_deps.py
