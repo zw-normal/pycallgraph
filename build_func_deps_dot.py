@@ -56,9 +56,8 @@ def get_path_funcs():
     for func_node in downstream_paths.items():
         path_funcs.update(func_node[1])
     if exclude_func_names:
-        for func_name in exclude_func_names:
-            if func_name != func_to_check:
-                path_funcs = (f for f in path_funcs if f.name != func_name)
+        exclude_func_names.discard(func_to_check)
+        path_funcs = {f for f in path_funcs if f.name not in exclude_func_names}
 
     return path_funcs
 
