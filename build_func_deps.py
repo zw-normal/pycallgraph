@@ -265,8 +265,9 @@ if __name__ == '__main__':
         pickle.dump(func_defs, output_file)
 
     # Phrase 2
-    func_defs_counter = Counter(
-        (f.get_name_and_args() for f in (fs for _, fs in func_defs.items())))
+    func_defs_counter = Counter()
+    for _, fds in func_defs.items():
+        func_defs_counter.update((f.get_name_and_args() for f in fds))
 
     # Phrase 3
     scan_source_files(FunctionDefVisitorPhase2)
