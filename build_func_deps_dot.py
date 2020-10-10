@@ -58,9 +58,9 @@ def generate_dot_png():
     if len(path_funcs) > 150:
         print('More than 150 functions in the graph of {}, '
               'please reduce upstream_cutoff and/or downstream_cutoff.'.format(func))
-        func_defs_counter = Counter((f.name for f in path_funcs))
-        print('Top 10 most common function names:')
-        print(func_defs_counter.most_common(10))
+        path_funcs_counter = Counter((f.name for f in path_funcs))
+        print('Top 10 most common function names in the graph:')
+        print(path_funcs_counter.most_common(10))
     else:
         func_call_graph = call_graph.subgraph(path_funcs)
         func_call_graph.nodes[func]['fillcolor'] = 'greenyellow'
