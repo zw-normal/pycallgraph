@@ -14,7 +14,7 @@ exclude_folders = (
 )
 
 # Threahold to exclude the function from graph
-function_name_threahold = 50
+function_def_threahold = 20
 
 # Output folder
 output_folder = './output'

@@ -6,13 +6,13 @@ import pickle
 import sys
 import fnmatch
 from enum import Enum
-from collections import defaultdict
+from collections import defaultdict, Counter
 
 import networkx as nx
 from networkx.readwrite.gpickle import write_gpickle
 
 from build_func_deps_config import (
-    source_roots, exclude_folders, function_name_threahold, output_folder)
+    source_roots, exclude_folders, function_def_threahold, output_folder)
 
 
 call_graph = nx.DiGraph()
@@ -84,11 +84,12 @@ def record_func_call(caller_def, callee):
     # Caller -> Callee
     func_name = get_func_callee_name(callee)
     if (func_name is not None) and (
-            len(func_defs[func_name]) <= function_name_threahold) and (
             not is_buildin_func(func_name)):
         call_args_length = len(callee.args) + len(callee.keywords)
         for func_def in func_defs[func_name]:
-            if (call_args_length >= func_def.min_args) and (call_args_length <= func_def.max_args):
+            if (func_defs_counter[func_def.get_name_and_args()] <= function_def_threahold) and (
+                    call_args_length >= func_def.min_args) and (
+                    call_args_length <= func_def.max_args):
                 call_graph.add_edge(caller_def, func_def, label='L{}'.format(callee.lineno))
 
 
@@ -147,6 +148,9 @@ class FunctionDef:
 
     def __repr__(self):
         return '{} ({} L{} C{})'.format(self.name, self.source, self.lineno, self.col_offset)
+
+    def get_name_and_args(self):
+        return '{}_{}_{}'.format(self.name, self.min_args, self.max_args)
 
     def output_dot_file_name(self):
         return '{}-{}_{}_{}.dot'.format(
@@ -261,5 +265,9 @@ if __name__ == '__main__':
         pickle.dump(func_defs, output_file)
 
     # Phrase 2
+    func_defs_counter = Counter(
+        (f.get_name_and_args() for f in (fs for _, fs in func_defs)))
+
+    # Phrase 3
     scan_source_files(FunctionDefVisitorPhase2)
     write_gpickle(call_graph, output_graph_file)
