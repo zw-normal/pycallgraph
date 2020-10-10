@@ -266,7 +266,7 @@ if __name__ == '__main__':
 
     # Phrase 2
     func_defs_counter = Counter(
-        (f.get_name_and_args() for f in (fs for _, fs in func_defs)))
+        (f.get_name_and_args() for f in (fs for _, fs in func_defs.items())))
 
     # Phrase 3
     scan_source_files(FunctionDefVisitorPhase2)
