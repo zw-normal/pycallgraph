@@ -4,6 +4,7 @@ import os
 import pickle
 import subprocess
 import argparse
+from collections import Counter
 
 import networkx as nx
 from networkx.readwrite.gpickle import read_gpickle
@@ -27,17 +28,11 @@ parser = argparse.ArgumentParser()
 parser.add_argument('func_to_check', help='The name of function to check', type=str)
 parser.add_argument('upstream_cutoffs', help='The cutoff for checking who is calling the func', type=int)
 parser.add_argument('downstream_cutoff', help='The cutoff for checking who the func is calling', type=int)
-parser.add_argument(
-    '-e', '--exclude', help='Comma-separated exclude function names: e.g. save, get_1_1_im',
-    required=False, default="")
 
 args = parser.parse_args()
 func_to_check = args.func_to_check
 upstream_cutoffs = args.upstream_cutoffs
 downstream_cutoff = args.downstream_cutoff
-exclude_func_names = set()
-if args.exclude:
-    exclude_func_names.update((e.strip() for e in args.exclude.split(',')))
 
 
 def get_path_funcs():
@@ -55,10 +50,6 @@ def get_path_funcs():
         path_funcs.update(func_node[1])
     for func_node in downstream_paths.items():
         path_funcs.update(func_node[1])
-    if exclude_func_names:
-        exclude_func_names.discard(func_to_check)
-        path_funcs = {f for f in path_funcs if f.name not in exclude_func_names}
-
     return path_funcs
 
 
@@ -67,6 +58,9 @@ def generate_dot_png():
     if len(path_funcs) > 150:
         print('More than 150 functions in the graph of {}, '
               'please reduce upstream_cutoff and/or downstream_cutoff.'.format(func))
+        func_defs_counter = Counter((f.name for f in path_funcs))
+        print('Top 10 most common function names:')
+        print(func_defs_counter.most_common(10))
     else:
         func_call_graph = call_graph.subgraph(path_funcs)
         func_call_graph.nodes[func]['fillcolor'] = 'greenyellow'
