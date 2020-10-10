@@ -12,7 +12,7 @@ The following example is the result of checking `load_plugins` function of the o
 ![Alt text](build_func_deps.example.png?raw=true "load_plugins graph")
 
 ## How to use
-Currently as some difficulties to config/run `pygraphviz` package on of Python 2.7 (bug: https://github.com/pygraphviz/pygraphviz/issues/137), only Linux is supported.
+Currently as some difficulties to config/run `pygraphviz` package on Windows, only Linux is supported.
 
 1. Clone the code:
     ```shell script
