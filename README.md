@@ -12,7 +12,7 @@ The following example is the result of checking `load_plugins` function of the o
 ![Alt text](build_func_deps.example.png?raw=true "load_plugins graph")
 
 ## How to use
-Currently as some difficulties to config/run `pygraphviz` package on Windows, only Linux is supported.
+Currently as some difficulties to config/run `pygraphviz` package on of Python 2.7 (bug: https://github.com/pygraphviz/pygraphviz/issues/137), only Linux is supported.
 
 1. Clone the code:
     ```shell script
@@ -52,6 +52,10 @@ Currently as some difficulties to config/run `pygraphviz` package on Windows, on
 8. Run the following command to generate & save the whole call graphs of the source code to the output folder:
     ```shell script
     ./venv/bin/python build_func_deps.py
+    ```
+    If on Python 2.7 a error about `enum` happens when tryting to run the above command, please run the follow command to install enum support and try again:
+    ```shell script
+    ./venv/Scripts/pip install enum34
     ```
 9. Run the following command to generate the png file for the function to be inspected:
     ```shell script

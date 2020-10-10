@@ -58,7 +58,7 @@ def get_path_funcs():
     if exclude_func_names:
         for func_name in exclude_func_names:
             if func_name != func_to_check:
-                path_funcs = filter(lambda f: func_name not in f.name, path_funcs)
+                path_funcs = (f for f in path_funcs if f.name != func_name)
 
     return path_funcs
 
