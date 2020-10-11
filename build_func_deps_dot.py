@@ -55,8 +55,8 @@ def get_path_funcs():
 
 def generate_dot_png():
     path_funcs = get_path_funcs()
-    if len(path_funcs) > 150:
-        print('More than 150 functions in the graph of {}, '
+    if len(path_funcs) > 120:
+        print('More than 120 functions in the graph of {}, '
               'please reduce upstream_cutoff and/or downstream_cutoff.'.format(func))
         path_funcs_counter = Counter((f.name for f in path_funcs))
         print('Top 10 most common function names in the graph:')

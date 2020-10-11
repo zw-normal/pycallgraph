@@ -71,5 +71,5 @@ Currently as some difficulties to config/run `pygraphviz` package on Windows, on
    
    NOTE: All line numbers and col offsets are estimated, because source code may be changed quite often, and those numbers have already been decided when building the graph. To update them, need to redo the step 8 based on the latest source code.
    
-   It is recommended for complex Python code keeping the `upstream_cutoffs` and `downstream_cutoff` low (less than 10?), or it will take too much time to generate the result png, or the result png will be empty.
+   It is recommended for complex Python code keeping the `upstream_cutoffs` and `downstream_cutoff` not too high, or it will take too much time to generate the result png, or the result png will be empty.
 10. From now on repeat step 9 to inspect any other functions. If you want to re-build the whole call graphs, just run step 8 again. Note unnecessary links can be present in the graph as we cannot differentiate functions from the calling side if there are functions having the same name, and the number of arguments matched.
