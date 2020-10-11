@@ -5,14 +5,15 @@ import os
 import pickle
 import sys
 import fnmatch
+import uuid
 from enum import Enum
-from collections import defaultdict, Counter
+from collections import defaultdict
 
 import networkx as nx
 from networkx.readwrite.gpickle import write_gpickle
 
 from build_func_deps_config import (
-    source_roots, exclude_folders, function_def_threahold, output_folder)
+    source_roots, exclude_folders, output_folder)
 
 
 call_graph = nx.DiGraph()
@@ -26,6 +27,7 @@ class FuncType(Enum):
     ClassMethod = ('c', 'bisque')
     StaticMethod = ('s', 'lightskyblue')
     InstanceMethod = ('i', 'lightgray')
+    DuplicationError = ('d', 'red')
 
 
 def is_buildin_func(name):
@@ -86,11 +88,22 @@ def record_func_call(caller_def, callee):
     if (func_name is not None) and (
             not is_buildin_func(func_name)):
         call_args_length = len(callee.args) + len(callee.keywords)
+        func_defs_to_add = []
         for func_def in func_defs[func_name]:
-            if (func_defs_counter[func_def.get_name_and_args()] <= function_def_threahold) and (
-                    call_args_length >= func_def.min_args) and (
+            if (call_args_length >= func_def.min_args) and (
                     call_args_length <= func_def.max_args):
-                call_graph.add_edge(caller_def, func_def, label='L{}'.format(callee.lineno))
+                func_defs_to_add.append(func_def)
+                if len(func_defs_to_add) > 1:
+                    func_duplicated_def = FunctionDef.from_duplicated_def(func_def.name)
+                    call_graph.add_node(
+                        func_duplicated_def,
+                        label='<{}<BR/><FONT POINT-SIZE="10">multiple defines</FONT>>'.format(func_def.name),
+                        shape='box', fillcolor=func_duplicated_def.type.value[1], style='filled')
+                    call_graph.add_edge(caller_def, func_duplicated_def)
+                    break
+        else:
+            if func_defs_to_add:
+                call_graph.add_edge(caller_def, func_defs_to_add[0], label='L{}'.format(callee.lineno))
 
 
 def get_min_args(func, func_type):
@@ -117,22 +130,33 @@ def get_base_source_name(source):
 
 class FunctionDef:
 
-    def __init__(self, source, node):
+    def __init__(self, source, lineno, col_offset, name, func_type, min_args, max_args):
         self.source = source
-        self.lineno = node.lineno
-        self.col_offset = node.col_offset
+        self.lineno = lineno
+        self.col_offset = col_offset
 
-        self.name = node.name
-        self.type = get_function_type(node)
-        self.min_args = get_min_args(node, self.type)
-        self.max_args = get_max_args(node, self.type)
+        self.name = name
+        self.type = func_type
+        self.min_args = min_args
+        self.max_args = max_args
+
+    @classmethod
+    def from_def_node(cls, source, node):
+        func_type = get_function_type(node)
+        return cls(
+            source, node.lineno, node.col_offset,
+            node.name, func_type, get_min_args(node, func_type), get_max_args(node, func_type))
 
     @classmethod
     def from_class_constructor(cls, source, node, class_name):
-        func_def = cls(source, node)
+        func_def = cls.from_def_node(source, node)
         func_def.name = class_name
         func_def.type = FuncType.Class
         return func_def
+
+    @classmethod
+    def from_duplicated_def(cls, name):
+        return cls(uuid.uuid4(), -1, -1, name, FuncType.DuplicationError, -1, -1)
 
     def __eq__(self, other):
         if isinstance(other, FunctionDef):
@@ -147,10 +171,9 @@ class FunctionDef:
         return hash((self.source, self.lineno, self.col_offset))
 
     def __repr__(self):
-        return '{} ({} L{} C{})'.format(self.name, self.source, self.lineno, self.col_offset)
-
-    def get_name_and_args(self):
-        return '{}_{}_{}'.format(self.name, self.min_args, self.max_args)
+        if self.type != FuncType.DuplicationError:
+            return '{} ({} L{} C{})'.format(self.name, self.source, self.lineno, self.col_offset)
+        return '{}'.format(self.name)
 
     def output_dot_file_name(self):
         return '{}-{}_{}_{}.dot'.format(
@@ -170,7 +193,7 @@ class FunctionDefVisitorPhase1(ast.NodeVisitor):
     def visit_FunctionDef(self, node):
         if node.name != '__init__':
             # visit_ClassDef handles the constructor
-            record_func_def(FunctionDef(self.source, node))
+            record_func_def(FunctionDef.from_def_node(self.source, node))
 
         self.generic_visit(node)
 
@@ -193,7 +216,7 @@ class FunctionDefVisitorPhase2(ast.NodeVisitor):
     def visit_FunctionDef(self, node):
         if node.name != '__init__':
             # As phase 1, visit_ClassDef handles the constructor
-            inspect_func_call(self.source, node, FunctionDef(self.source, node))
+            inspect_func_call(self.source, node, FunctionDef.from_def_node(self.source, node))
         self.generic_visit(node)
 
     def visit_ClassDef(self, node):
@@ -265,10 +288,5 @@ if __name__ == '__main__':
         pickle.dump(func_defs, output_file)
 
     # Phrase 2
-    func_defs_counter = Counter()
-    for _, fds in func_defs.items():
-        func_defs_counter.update((f.get_name_and_args() for f in fds))
-
-    # Phrase 3
     scan_source_files(FunctionDefVisitorPhase2)
     write_gpickle(call_graph, output_graph_file)

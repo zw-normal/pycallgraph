@@ -13,9 +13,6 @@ exclude_folders = (
     'xtest', 'test',
 )
 
-# Threahold to exclude the function from graph
-function_def_threahold = 20
-
 # Output folder
 output_folder = './output'
 

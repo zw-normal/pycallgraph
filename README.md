@@ -1,6 +1,6 @@
 # pyCallGraph
 
-The project uses Python ast module and simple algorithm (but effective) to generate static call graph of Python code. Basically it uses source code information (source file name, line no and col offset) when deciding function definition, but on the calling side, it only consider function names and the number of arguments when adding graph edges. Because nature of this comparison, this tool may **add extra (wrong) calling edges** for a function with common name (e.g. `save`, `load` etc.) in the graph, although considering arguments can alleviate this issue. It works well with functions that has more specific name (e.g. `load_plugins` etc.).
+The project uses Python ast module and simple algorithm (but effective) to generate static call graph of Python code. Basically it uses source code information (source file name, line no and col offset) when deciding function definition, but on the calling side, it only consider function names and the number of arguments when adding graph edges. The graph stop at nodes when multiple function definitions can match the calling.
 
 The code and dependencies can be easily adjusted to work with both Python 2.7 or Python 3, but make sure to pickup the Python version matching source code (e.g. do not use Python 2 ast to analyse Python 3, or vise verse.)
 
@@ -48,7 +48,7 @@ Currently as some difficulties to config/run `pygraphviz` package on Windows, on
     sudo apt-get install python3-dev graphviz libgraphviz-dev pkg-config
     ./venv/bin/pip install pygraphviz
     ```
-7. Now the environment is ready, copy `build_func_deps_config.example.py` to `build_func_deps_config.py` and setup output folder, the source code folders (`source_roots` list), `exclude_folders` and `function_name_threahold` in it. `function_def_threahold` defines if a common function definition appears too many times, it will be excluded from the graph call edges.
+7. Now the environment is ready, copy `build_func_deps_config.example.py` to `build_func_deps_config.py` and setup output folder, the source code folders (`source_roots` list) and `exclude_folders`.
 8. Run the following command to generate & save the whole call graphs of the source code to the output folder:
     ```shell script
     ./venv/bin/python build_func_deps.py
