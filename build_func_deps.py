@@ -30,7 +30,12 @@ class FuncType(Enum):
 
 
 def is_buildin_func(name):
-    return name in __builtins__.__dict__.keys()
+    return name in __builtins__.__dict__.keys() or \
+           name in dir(dict) or \
+           name in dir(list) or \
+           name in dir(set) or \
+           name in dir(tuple) or \
+           name in dir(str)
 
 
 def get_function_type(func):
@@ -114,8 +119,8 @@ def record_ambiguity_call(source, caller_def, call_node):
     ambiguity_call_def = FunctionDef.from_ambiguity_call(source, call_node)
     call_graph.add_node(
         ambiguity_call_def,
-        label='<{}<BR/><FONT POINT-SIZE="10">ambiguity calls</FONT>>'.format(
-            ambiguity_call_def.name),
+        label='<{}<BR/><FONT POINT-SIZE="10">ambiguity calls L{}</FONT>>'.format(
+            ambiguity_call_def.name, ambiguity_call_def.lineno),
         shape='box', fillcolor=ambiguity_call_def.type.value[1], style='filled')
     call_graph.add_edge(caller_def, ambiguity_call_def)
 
