@@ -14,7 +14,7 @@ exclude_folders = (
 )
 
 # Allow how many ambiguity callings
-ambiguity_calls_threshold = 2
+ambiguity_calls_threshold = 1
 
 # Output folder
 output_folder = './output'

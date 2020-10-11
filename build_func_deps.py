@@ -5,7 +5,6 @@ import os
 import pickle
 import sys
 import fnmatch
-import uuid
 from enum import Enum
 from collections import defaultdict
 
@@ -27,7 +26,8 @@ class FuncType(Enum):
     ClassMethod = ('c', 'bisque')
     StaticMethod = ('s', 'lightskyblue')
     InstanceMethod = ('i', 'lightgray')
-    DuplicationError = ('d', 'red')
+    AmbiguityCallerError = ('ace', 'red')
+    AmbiguityCallError = ('ac', 'red')
 
 
 def is_buildin_func(name):
@@ -82,29 +82,44 @@ def get_func_callee_name(callee):
     return None
 
 
-def record_func_call(caller_def, callee):
+# def record_ambiguity_caller(callee_def):
+#     ambiguity_caller_def = FunctionDef.from_ambiguity_caller(callee_def.name)
+#     call_graph.add_node(
+#         ambiguity_caller_def,
+#         label='<{}<BR/><FONT POINT-SIZE="10">ambiguity callers &gt; {}</FONT>>'.format(
+#             ambiguity_caller_def.name, ambiguity_calls_threshold),
+#         shape='box', fillcolor=ambiguity_caller_def.type.value[1], style='filled')
+#     call_graph.add_edge(ambiguity_caller_def, callee_def)
+
+
+def record_ambiguity_call(source, caller_def, call_node):
+    ambiguity_call_def = FunctionDef.from_ambiguity_call(source, call_node)
+    call_graph.add_node(
+        ambiguity_call_def,
+        label='<{}<BR/><FONT POINT-SIZE="10">ambiguity calls &gt; {}</FONT>>'.format(
+            ambiguity_call_def.name, ambiguity_calls_threshold),
+        shape='box', fillcolor=ambiguity_call_def.type.value[1], style='filled')
+    call_graph.add_edge(caller_def, ambiguity_call_def)
+
+
+def record_func_call(source, caller_def, call_node):
     # Caller -> Callee
-    func_name = get_func_callee_name(callee)
-    if (func_name is not None) and (
-            not is_buildin_func(func_name)):
-        call_args_length = len(callee.args) + len(callee.keywords)
+    func_name = get_func_callee_name(call_node)
+    if (func_name is not None) and (not is_buildin_func(func_name)):
+        call_args_length = len(call_node.args) + len(call_node.keywords)
+
         func_defs_to_add = []
         for func_def in func_defs[func_name]:
-            if (call_args_length >= func_def.min_args) and (
-                    call_args_length <= func_def.max_args):
+            if (call_args_length >= func_def.min_args) and (call_args_length <= func_def.max_args):
                 func_defs_to_add.append(func_def)
-                if len(func_defs_to_add) > ambiguity_calls_threshold:
-                    func_duplicated_def = FunctionDef.from_duplicated_def(func_def.name)
-                    call_graph.add_node(
-                        func_duplicated_def,
-                        label='<{}<BR/><FONT POINT-SIZE="10">ambiguity calls &gt; {}</FONT>>'.format(
-                            func_def.name, ambiguity_calls_threshold),
-                        shape='box', fillcolor=func_duplicated_def.type.value[1], style='filled')
-                    call_graph.add_edge(caller_def, func_duplicated_def)
-                    break
+
+        if len(func_defs_to_add) > ambiguity_calls_threshold:
+            # for func_def in func_defs_to_add:
+            #     record_ambiguity_caller(func_def)
+            record_ambiguity_call(source, caller_def, call_node)
         else:
             for func_def in func_defs_to_add:
-                call_graph.add_edge(caller_def, func_def, label='L{}'.format(callee.lineno))
+                call_graph.add_edge(caller_def, func_def, label='L{}'.format(call_node.lineno))
 
 
 def get_min_args(func, func_type):
@@ -155,9 +170,18 @@ class FunctionDef:
         func_def.type = FuncType.Class
         return func_def
 
+    # @classmethod
+    # def from_ambiguity_caller(cls, callee_name):
+    #     return cls(
+    #         '{}_ambiguity_caller'.format(callee_name), -1, -1,
+    #         callee_name, FuncType.AmbiguityCallerError, -1, -1)
+
     @classmethod
-    def from_duplicated_def(cls, name):
-        return cls(uuid.uuid4(), -1, -1, name, FuncType.DuplicationError, -1, -1)
+    def from_ambiguity_call(cls, source, call_node):
+        callee_name = get_func_callee_name(call_node)
+        return cls(
+            '{}_ambiguity_call'.format(source), call_node.lineno, call_node.col_offset,
+            callee_name, FuncType.AmbiguityCallError, -1, -1)
 
     def __eq__(self, other):
         if isinstance(other, FunctionDef):
@@ -172,9 +196,7 @@ class FunctionDef:
         return hash((self.source, self.lineno, self.col_offset))
 
     def __repr__(self):
-        if self.type != FuncType.DuplicationError:
-            return '{} ({} L{} C{})'.format(self.name, self.source, self.lineno, self.col_offset)
-        return '{}'.format(self.name)
+        return '{} ({} L{} C{})'.format(self.name, self.source, self.lineno, self.col_offset)
 
     def output_dot_file_name(self):
         return '{}-{}_{}_{}.dot'.format(
@@ -239,7 +261,7 @@ class FunctionCallVisitor(ast.NodeVisitor):
 
     def visit_Call(self, node):
         # Caller -> Callee
-        record_func_call(self.caller_def, node)
+        record_func_call(self.source, self.caller_def, node)
         self.generic_visit(node)
 
     # def visit_Attribute(self, node):
