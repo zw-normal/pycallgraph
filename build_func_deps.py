@@ -13,7 +13,7 @@ import networkx as nx
 from networkx.readwrite.gpickle import write_gpickle
 
 from build_func_deps_config import (
-    source_roots, exclude_folders, output_folder)
+    source_roots, exclude_folders, ambiguity_calls_threshold, output_folder)
 
 
 call_graph = nx.DiGraph()
@@ -93,17 +93,18 @@ def record_func_call(caller_def, callee):
             if (call_args_length >= func_def.min_args) and (
                     call_args_length <= func_def.max_args):
                 func_defs_to_add.append(func_def)
-                if len(func_defs_to_add) > 1:
+                if len(func_defs_to_add) > ambiguity_calls_threshold:
                     func_duplicated_def = FunctionDef.from_duplicated_def(func_def.name)
                     call_graph.add_node(
                         func_duplicated_def,
-                        label='<{}<BR/><FONT POINT-SIZE="10">multiple defines</FONT>>'.format(func_def.name),
+                        label='<{}<BR/><FONT POINT-SIZE="10">ambiguity calls > {}</FONT>>'.format(
+                            func_def.name, ambiguity_calls_threshold),
                         shape='box', fillcolor=func_duplicated_def.type.value[1], style='filled')
                     call_graph.add_edge(caller_def, func_duplicated_def)
                     break
         else:
-            if func_defs_to_add:
-                call_graph.add_edge(caller_def, func_defs_to_add[0], label='L{}'.format(callee.lineno))
+            for func_def in func_defs_to_add:
+                call_graph.add_edge(caller_def, func_def, label='L{}'.format(callee.lineno))
 
 
 def get_min_args(func, func_type):
