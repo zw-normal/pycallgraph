@@ -97,7 +97,7 @@ def solve_ambiguity_call(caller_def, call_node):
 
         if enable_ambiguity_call_guessing:
             # Firstly guessing caller and callee in the same source file
-            if len(func_defs_guessing) > 1:
+            if len(func_defs_matched) > 1:
                 func_defs_guessing = tuple(
                     fd for fd in func_defs_matched if fd.source == caller_def.source)
 
