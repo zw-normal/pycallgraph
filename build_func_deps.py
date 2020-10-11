@@ -97,7 +97,7 @@ def record_func_call(caller_def, callee):
                     func_duplicated_def = FunctionDef.from_duplicated_def(func_def.name)
                     call_graph.add_node(
                         func_duplicated_def,
-                        label='<{}<BR/><FONT POINT-SIZE="10">ambiguity calls > {}</FONT>>'.format(
+                        label='<{}<BR/><FONT POINT-SIZE="10">ambiguity calls more than {}</FONT>>'.format(
                             func_def.name, ambiguity_calls_threshold),
                         shape='box', fillcolor=func_duplicated_def.type.value[1], style='filled')
                     call_graph.add_edge(caller_def, func_duplicated_def)
