@@ -100,12 +100,12 @@ def solve_ambiguity_call(caller_def, call_node):
             if len(func_defs_matched) > 1:
                 func_defs_guessing = tuple(
                     fd for fd in func_defs_matched if (
-                            fd.source in caller_def.source or caller_def.source in fd.source))
+                        (fd.source in caller_def.source) or (caller_def.source in fd.source)))
 
             # Second guessing caller and callee in the same source file
             if len(func_defs_guessing) > 1:
                 func_defs_guessing = tuple(
-                    fd for fd in func_defs_matched if fd.source == caller_def.source)
+                    fd for fd in func_defs_guessing if fd.source == caller_def.source)
 
             # Last guessing by calculating distance of lines, and choose the nearest one
             if len(func_defs_guessing) > 1:
