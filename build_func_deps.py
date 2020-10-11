@@ -95,9 +95,23 @@ def solve_ambiguity_call(caller_def, call_node):
             if (call_args_length >= func_def.min_args) and (call_args_length <= func_def.max_args):
                 func_defs_matched.append(func_def)
 
-        # Secondly try to match source (if caller and callee in the same source file)
-        if len(func_defs_matched) > 1 and enable_ambiguity_call_guessing:
-            func_defs_guessing = tuple(fd for fd in func_defs_matched if fd.source == caller_def.source)
+        if enable_ambiguity_call_guessing:
+            # Firstly guessing caller and callee in the similar modules
+            if len(func_defs_matched) > 1:
+                func_defs_guessing = tuple(
+                    fd for fd in func_defs_matched if (
+                            fd.source in caller_def.source or caller_def.source in fd.source))
+
+            # Second guessing caller and callee in the same source file
+            if len(func_defs_guessing) > 1:
+                func_defs_guessing = tuple(
+                    fd for fd in func_defs_matched if fd.source == caller_def.source)
+
+            # Last guessing by calculating distance of lines, and choose the nearest one
+            if len(func_defs_guessing) > 1:
+                func_defs_guessing = sorted(
+                    func_defs_guessing, key=lambda fd: abs(fd.lineno-caller_def.lineno))
+                func_defs_guessing = func_defs_guessing[0:1]
 
     return func_defs_guessing if func_defs_guessing else func_defs_matched
 
