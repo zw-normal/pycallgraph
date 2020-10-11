@@ -48,7 +48,7 @@ Currently as some difficulties to config/run `pygraphviz` package on Windows, on
     sudo apt-get install python3-dev graphviz libgraphviz-dev pkg-config
     ./venv/bin/pip install pygraphviz
     ```
-7. Now the environment is ready, copy `build_func_deps_config.example.py` to `build_func_deps_config.py` and setup output folder, the source code folders (`source_roots` list), `exclude_folders` and `ambiguity_calls_threshold`. The `ambiguity_calls_threshold` option defines how many ambiguity calls are allowed when generating the graph. It is recommended to keep it as low as 2 or 3, as too many ambiguity calls will make it difficult or even impossible to generate graph for many function. Note avoid ambiguity calls can make graph missing some call edges.
+7. Now the environment is ready, copy `build_func_deps_config.example.py` to `build_func_deps_config.py` and setup output folder, the source code folders (`source_roots` list), `exclude_folders` and `enable_ambiguity_call_guessing`. The `enable_ambiguity_call_guessing` option allows the tool guess which function is called when multiple function definition matched.
 8. Run the following command to generate & save the whole call graphs of the source code to the output folder:
     ```shell script
     ./venv/bin/python build_func_deps.py

@@ -13,8 +13,8 @@ exclude_folders = (
     'xtest', 'test',
 )
 
-# Allow how many ambiguity callings
-ambiguity_calls_threshold = 2
+# Allow guessing ambiguity call
+enable_ambiguity_call_guessing = True
 
 # Output folder
 output_folder = './output'

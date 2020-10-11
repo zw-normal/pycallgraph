@@ -12,7 +12,7 @@ import networkx as nx
 from networkx.readwrite.gpickle import write_gpickle
 
 from build_func_deps_config import (
-    source_roots, exclude_folders, ambiguity_calls_threshold, output_folder)
+    source_roots, exclude_folders, enable_ambiguity_call_guessing, output_folder)
 
 
 call_graph = nx.DiGraph()
@@ -81,35 +81,42 @@ def get_func_callee_name(callee):
     return None
 
 
-def solve_ambiguity_call(source, caller_def, call_node):
+def solve_ambiguity_call(caller_def, call_node):
     # How to solve ambiguity call will be our core issue
     func_name = get_func_callee_name(call_node)
     func_defs_matched = []
+    func_defs_guessing = []
 
     if (func_name is not None) and (not is_buildin_func(func_name)):
         call_args_length = len(call_node.args) + len(call_node.keywords)
 
+        # Firstly try to match with the number of arguments (always accurate)
         for func_def in func_defs[func_name]:
             if (call_args_length >= func_def.min_args) and (call_args_length <= func_def.max_args):
                 func_defs_matched.append(func_def)
-    return func_defs_matched
+
+        # Secondly try to match source (if caller and callee in the same source file)
+        if len(func_defs_matched) > 1 and enable_ambiguity_call_guessing:
+            func_defs_guessing = tuple(fd for fd in func_defs_matched if fd.source == caller_def.source)
+
+    return func_defs_guessing if func_defs_guessing else func_defs_matched
 
 
 def record_ambiguity_call(source, caller_def, call_node):
     ambiguity_call_def = FunctionDef.from_ambiguity_call(source, call_node)
     call_graph.add_node(
         ambiguity_call_def,
-        label='<{}<BR/><FONT POINT-SIZE="10">ambiguity calls &gt; {}</FONT>>'.format(
-            ambiguity_call_def.name, ambiguity_calls_threshold),
+        label='<{}<BR/><FONT POINT-SIZE="10">ambiguity calls</FONT>>'.format(
+            ambiguity_call_def.name),
         shape='box', fillcolor=ambiguity_call_def.type.value[1], style='filled')
     call_graph.add_edge(caller_def, ambiguity_call_def)
 
 
 def record_func_call(source, caller_def, call_node):
     # Caller -> Callee
-    func_defs_matched = solve_ambiguity_call(source, caller_def, call_node)
+    func_defs_matched = solve_ambiguity_call(caller_def, call_node)
     if func_defs_matched:
-        if len(func_defs_matched) > ambiguity_calls_threshold:
+        if len(func_defs_matched) > 1:
             record_ambiguity_call(source, caller_def, call_node)
         else:
             for func_def in func_defs_matched:
