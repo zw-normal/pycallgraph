@@ -119,10 +119,10 @@ def record_ambiguity_call(source, caller_def, call_node):
     ambiguity_call_def = FunctionDef.from_ambiguity_call(source, call_node)
     call_graph.add_node(
         ambiguity_call_def,
-        label='<{}<BR/><FONT POINT-SIZE="10">ambiguity calls L{}</FONT>>'.format(
-            ambiguity_call_def.name, ambiguity_call_def.lineno),
+        label='<{}<BR/><FONT POINT-SIZE="10">ambiguity calls</FONT>>'.format(
+            ambiguity_call_def.name),
         shape='box', fillcolor=ambiguity_call_def.type.value[1], style='filled')
-    call_graph.add_edge(caller_def, ambiguity_call_def)
+    call_graph.add_edge(caller_def, ambiguity_call_def, label='L{}'.format(call_node.lineno))
 
 
 def record_func_call(source, caller_def, call_node):
