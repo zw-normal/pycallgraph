@@ -14,7 +14,7 @@ from build_func_deps import (
     output_graph_file as input_graph_file,
     output_def_file as input_def_file,
     FunctionDef, FuncType)
-from build_func_deps_config import (output_folder)
+from build_func_deps_config import output_folder
 
 
 # Load existing graph
