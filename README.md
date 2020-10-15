@@ -12,8 +12,7 @@ The following example is the result of checking `load_plugins` function of the o
 ![Alt text](build_func_deps.example.png?raw=true "load_plugins graph")
 
 ## How to use
-Currently as some difficulties to config/run `pygraphviz` package on Windows, only Linux is supported.
-
+Note in the following steps, mainly use Linux Python `virtualenv` path `./venv/bin`, for Windows, please replace this path to `.\venv\Scripts`.
 1. Clone the code:
     ```shell script
     git clone https://github.com/zw-normal/pycallgraph.git
@@ -36,20 +35,19 @@ Currently as some difficulties to config/run `pygraphviz` package on Windows, on
     ```shell script
     ./venv/bin/pip install networkx
     ```
-6. Install `pygraphviz` (please choose Python version according to your needs):
-    * Python 2
+6. (Linux) Install `graphviz`:
     ```shell script
-    sudo apt-get install python-dev graphviz libgraphviz-dev pkg-config
-    ./venv/bin/pip install pygraphviz
+    sudo apt-get install graphviz
     ```
-    
-    * Python 3
+6. (Windows) Install `graphviz`:
+
+    Download the latest binary build from https://www2.graphviz.org/Packages/stable/windows/10/cmake/Release/x64/ and install. After installation, please make sure the `bin` folder (e.g. `C:\Program Files\Graphviz\bin`) is in `Path` environment variable.
+7. Install `pydot` (please choose Python version according to your needs):
     ```shell script
-    sudo apt-get install python3-dev graphviz libgraphviz-dev pkg-config
-    ./venv/bin/pip install pygraphviz
+    ./venv/bin/pip install pydot
     ```
-7. Now the environment is ready, copy `build_func_deps_config.example.py` to `build_func_deps_config.py` and setup output folder, the source code folders (`source_roots` list), `exclude_folders` and `enable_ambiguity_call_guessing`. The `enable_ambiguity_call_guessing` option allows the tool guess which function is called when multiple function definition matched. Note all method names from common Python classes (e.g. dict, list, str, set, tuple) are excluded.
-8. Run the following command to generate & save the whole call graphs of the source code to the output folder:
+8. Now the environment is ready, copy `build_func_deps_config.example.py` to `build_func_deps_config.py` and setup output folder, the source code folders (`source_roots` list), `exclude_folders` and `enable_ambiguity_call_guessing`. The `enable_ambiguity_call_guessing` option allows the tool guess which function is called when multiple function definition matched. Note all method names from common Python classes (e.g. dict, list, str, set, tuple) are excluded.
+9. Run the following command to generate & save the whole call graphs of the source code to the output folder:
     ```shell script
     ./venv/bin/python build_func_deps.py
     ```
@@ -57,7 +55,7 @@ Currently as some difficulties to config/run `pygraphviz` package on Windows, on
     ```shell script
     ./venv/bin/pip install enum34
     ```
-9. Run the following command to generate the png file for the function to be inspected:
+10. Run the following command to generate the png file for the function to be inspected:
     ```shell script
     ./venv/bin/python build_func_deps_dot.py 'load_plugins' 3 0
     ```
@@ -72,4 +70,4 @@ Currently as some difficulties to config/run `pygraphviz` package on Windows, on
    NOTE: All line numbers and col offsets are estimated, because source code may be changed quite often, and those numbers have already been decided when building the graph. To update them, need to redo the step 8 based on the latest source code.
    
    It is recommended for complex Python code keeping the `upstream_cutoffs` and `downstream_cutoff` not too high, or it will take too much time to generate the result png, or the result png will be empty.
-10. From now on repeat step 9 to inspect any other functions. If you want to re-build the whole call graphs, just run step 8 again. Note unnecessary links can be present in the graph as we cannot differentiate functions from the calling side if there are functions having the same name, and the number of arguments matched.
+11. From now on repeat step 10 to inspect any other functions. If you want to re-build the whole call graphs, just run step 9 again. Note unnecessary links can be present in the graph as we cannot differentiate functions from the calling side if there are functions having the same name, and the number of arguments matched.
