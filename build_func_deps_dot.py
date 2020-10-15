@@ -8,7 +8,7 @@ from collections import Counter
 
 import networkx as nx
 from networkx.readwrite.gpickle import read_gpickle
-from networkx.drawing.nx_pydot import write_dot
+from networkx.drawing.nx_agraph import write_dot
 
 from build_func_deps import (
     output_graph_file as input_graph_file,
