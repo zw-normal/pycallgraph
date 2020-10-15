@@ -26,7 +26,7 @@ class FuncType(Enum):
     ClassMethod = ('c', 'bisque')
     StaticMethod = ('s', 'lightskyblue')
     InstanceMethod = ('i', 'lightgray')
-    AmbiguityCallError = ('ac', 'red')
+    AmbiguityCallError = ('ac', 'indianred1')
 
 
 def is_buildin_func(name):
