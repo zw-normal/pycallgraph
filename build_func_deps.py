@@ -210,7 +210,7 @@ class FunctionDef:
         return hash((self.source, self.lineno, self.col_offset))
 
     def __repr__(self):
-        return '{} ({} L{} C{})'.format(self.name, self.source.replace(os.path.sep, '/'), self.lineno, self.col_offset)
+        return '{} ({} L{} C{})'.format(self.name, self.source, self.lineno, self.col_offset)
 
     def output_dot_file_name(self):
         return '{}-{}_{}_{}.dot'.format(
