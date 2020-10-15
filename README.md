@@ -62,15 +62,15 @@ Note in the following steps, mainly use Linux Python `virtualenv` path `./venv/b
     ```shell script
     ./venv/bin/python build_func_deps_dot.py 'load_plugins' 3 0
     ```
-   The first argument is the name of the function to check. The second argument is the `upstream_cutoffs` and the third one is `downstream_cutoff`. Please run the following command to get helps:
+    The first argument is the name of the function to check. The second argument is the `upstream_cutoffs` and the third one is `downstream_cutoff`. Please run the following command to get helps:
     ```shell script
     ./venv/bin/python build_func_deps_dot.py -h
     ```
-   The output png file(s) in the png file(s) is in the format of `funcname-source_lineno_coloffset`, as the tool differentiate function definitions with those info (small chances of conflicts as we only use base name of the source file when generating output). The node name(s) in the graph is in the format of `funcname (source lineno)`, and use different colors to represent different function types (`wheat` for normal function, `yellow` for class, `orchid` for property - support is turned off for speeding up, `bisque` for class method, `lightskyblue` for static method and `lightgray` for instance method).
+    The output png file(s) in the png file(s) is in the format of `funcname-source_lineno_coloffset`, as the tool differentiate function definitions with those info (small chances of conflicts as we only use base name of the source file when generating output). The node name(s) in the graph is in the format of `funcname (source lineno)`, and use different colors to represent different function types (`wheat` for normal function, `yellow` for class, `orchid` for property - support is turned off for speeding up, `bisque` for class method, `lightskyblue` for static method and `lightgray` for instance method).
    
-   The source info on the node represents which source file on which line the function is defined, and the line number on the edge represents on which line the target function is called.
+    The source info on the node represents which source file on which line the function is defined, and the line number on the edge represents on which line the target function is called.
    
-   NOTE: All line numbers and col offsets are estimated, because source code may be changed quite often, and those numbers have already been decided when building the graph. To update them, need to redo the step 8 based on the latest source code.
+    NOTE: All line numbers and col offsets are estimated, because source code may be changed quite often, and those numbers have already been decided when building the graph. To update them, need to redo the step 8 based on the latest source code.
    
-   It is recommended for complex Python code keeping the `upstream_cutoffs` and `downstream_cutoff` not too high, or it will take too much time to generate the result png, or the result png will be empty.
+    It is recommended for complex Python code keeping the `upstream_cutoffs` and `downstream_cutoff` not too high, or it will take too much time to generate the result png, or the result png will be empty.
 11. From now on repeat step 10 to inspect any other functions. If you want to re-build the whole call graphs, just run step 9 again. Note unnecessary links can be present in the graph as we cannot differentiate functions from the calling side if there are functions having the same name, and the number of arguments matched.
