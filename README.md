@@ -35,12 +35,15 @@ Note in the following steps, mainly use Linux Python `virtualenv` path `./venv/b
     ```shell script
     ./venv/bin/pip install networkx
     ```
-6. (Linux) Install `graphviz`:
+6. Install `graphviz`:
+    
+    Linux
     ```shell script
     sudo apt-get install graphviz
     ```
-6. (Windows) Install `graphviz`:
-
+    
+    Windows
+    
     Download the latest binary build from https://www2.graphviz.org/Packages/stable/windows/10/cmake/Release/x64/ and install. After installation, please make sure the `bin` folder (e.g. `C:\Program Files\Graphviz\bin`) is in `Path` environment variable.
 7. Install `pydot` (please choose Python version according to your needs):
     ```shell script
