@@ -5,6 +5,7 @@ import os
 import pickle
 import sys
 import fnmatch
+import hashlib
 from enum import Enum
 from collections import defaultdict
 
@@ -210,7 +211,8 @@ class FunctionDef:
         return hash((self.source, self.lineno, self.col_offset))
 
     def __repr__(self):
-        return '{} ({} L{} C{})'.format(self.name, self.source.replace('\\', '/'), self.lineno, self.col_offset)
+        source_hash = hashlib.md5(self.source).hexdigest()
+        return '{} ({} L{} C{})'.format(self.name, source_hash, self.lineno, self.col_offset)
 
     def output_dot_file_name(self):
         return '{}-{}_{}_{}.dot'.format(
