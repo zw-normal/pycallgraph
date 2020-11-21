@@ -211,7 +211,7 @@ class FunctionDef:
         return hash((self.source, self.lineno, self.col_offset))
 
     def __repr__(self):
-        source_hash = hashlib.md5(self.source).hexdigest()
+        source_hash = hashlib.md5(self.source.encode('utf8')).hexdigest()
         return '{} ({} L{} C{})'.format(self.name, source_hash, self.lineno, self.col_offset)
 
     def output_dot_file_name(self):
@@ -308,7 +308,7 @@ def scan_source_files(visitor_cls):
             dirs[:] = [d for d in dirs if d not in exclude_folders]
             for source_file in files:
                 if fnmatch.fnmatch(source_file, '*.py') and ('test' not in source_file):
-                    with open(os.path.join(folder, source_file), 'r') as source:
+                    with open(os.path.join(folder, source_file), 'r', encoding='utf-8') as source:
                         print('Scanning {}'.format(source.name))
                         ast_tree = ast.parse(source.read())
                         visitor = visitor_cls(source.name)
